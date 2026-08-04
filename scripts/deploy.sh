@@ -24,7 +24,7 @@ CHART_PATH="${CHART_PATH:-charts/warchi-mcp}"
 VALUES_FILE="${VALUES_FILE:-$CHART_PATH/values.yaml}"
 BUILD_IMAGE="${BUILD_IMAGE:-true}"
 WAIT_TIMEOUT="${WAIT_TIMEOUT:-180}"
-IMAGE_TAG="${IMAGE_TAG:-0.1.0}"
+IMAGE_TAG="${IMAGE_TAG:-0.1.1}"
 AREPOS_BASE_URL="${AREPOS_BASE_URL:-http://arepos-server:8080}"
 
 log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
