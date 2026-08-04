@@ -54,6 +54,29 @@ class SearchTools(
         )
     }
 
+    @McpTool(
+        name = "search_notation",
+        description = "Slim search of components/relations inside a notation by name. " +
+            "Returns {kind,id,name,version,nodeTypeId|linkTypeId}. Prefer over get_notation_summary for discovery."
+    )
+    fun searchNotation(
+        @McpToolParam(description = "Notation UUID", required = true) notationId: String,
+        @McpToolParam(description = "Substring to match against component/relation name", required = true) q: String,
+        @McpToolParam(description = "Comma-separated kinds: components,relations (default both)", required = false)
+        kinds: String? = null,
+        @McpToolParam(description = "Max hits (default 20, max 50)", required = false)
+        limit: Int? = null
+    ): String = runTool {
+        api.getJson(
+            "/api/v1/search/notations/$notationId",
+            mapOf(
+                "q" to q,
+                "kinds" to kinds?.takeIf { it.isNotBlank() },
+                "limit" to limit
+            )
+        )
+    }
+
     private fun runTool(block: () -> Any?): String =
         try {
             ToolResult.ok(block())

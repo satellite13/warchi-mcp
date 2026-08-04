@@ -37,4 +37,28 @@ class ToolResultTest {
         )
         assertTrue(json.contains("LOCKED_BY_OTHER"))
     }
+
+    @Test
+    fun `error classifies ambiguous notation element`() {
+        val json = ToolResult.error(
+            AreposClientException(
+                status = 409,
+                message = "Ambiguous",
+                body = """{"error":"AMBIGUOUS_NOTATION_ELEMENT","candidates":[]}"""
+            )
+        )
+        assertTrue(json.contains("AMBIGUOUS_NOTATION_ELEMENT"))
+    }
+
+    @Test
+    fun `error classifies diagram conflict`() {
+        val json = ToolResult.error(
+            AreposClientException(
+                status = 409,
+                message = "Conflict",
+                body = """{"error":"DIAGRAM_CONFLICT","diagramId":"x"}"""
+            )
+        )
+        assertTrue(json.contains("DIAGRAM_CONFLICT"))
+    }
 }

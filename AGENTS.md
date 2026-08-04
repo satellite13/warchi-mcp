@@ -71,6 +71,9 @@ Feature work that spans components uses a shared branch name, e.g. `feat/warchi-
 
 ## Out of Scope (v1)
 
-- Notation CRUD, shares, files, OEF import, admin tools
+- Notation CRUD, shares, OEF import, admin tools
 - Stdio transport
 - Own persistence for keys or sessions
+- `layout_diagram`, graph neighbors, relation-rules enforce on create, `delete_diagram`
+
+Convenience write path for landscapes: `search_notation` → notation-aware `create_node` / `ensure_link` → `create_diagram` → `add_diagram_instances` (arepos-backed). `batch_save_model` remains the escape hatch.

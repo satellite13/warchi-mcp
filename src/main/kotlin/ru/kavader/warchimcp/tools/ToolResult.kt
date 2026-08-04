@@ -44,7 +44,12 @@ object ToolResult {
         val body = ex.body.orEmpty()
         val message = ex.message
         when {
-            ex.status == 409 || body.contains("BATCH_SAVE_CONFLICT") || message.contains("conflict", true) ->
+            body.contains("AMBIGUOUS_NOTATION_ELEMENT") || message.contains("AMBIGUOUS_NOTATION_ELEMENT") ->
+                root.put("code", "AMBIGUOUS_NOTATION_ELEMENT")
+            body.contains("DIAGRAM_CONFLICT") || message.contains("DIAGRAM_CONFLICT") ->
+                root.put("code", "DIAGRAM_CONFLICT")
+            body.contains("BATCH_SAVE_CONFLICT") ||
+                (ex.status == 409 && message.contains("conflict", true) && !body.contains("DIAGRAM_CONFLICT")) ->
                 root.put("code", "BATCH_SAVE_CONFLICT")
             body.contains("LOCKED_BY_OTHER") || message.contains("LOCKED_BY_OTHER") ->
                 root.put("code", "LOCKED_BY_OTHER")
