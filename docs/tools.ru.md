@@ -20,6 +20,8 @@ English: [`tools.md`](tools.md)
 
 | Tool | Назначение | Основные аргументы |
 |------|------------|--------------------|
+| `search_catalog` | Компактный поиск моделей/нотаций по имени | `q`, `kinds?`, `limit?` |
+| `search_model` | Компактный поиск узлов/связей/диаграмм в модели | `modelId`, `q`, `kinds?`, `limit?` |
 | `list_models` | Список доступных моделей | `name?`, `page?`, `size?` |
 | `get_model` | Метаданные модели | `modelId` |
 | `list_diagrams` | Диаграммы модели | `modelId`, `page?`, `size?` |
@@ -30,6 +32,12 @@ English: [`tools.md`](tools.md)
 | `get_link` | Связь + attrs | `linkId` |
 | `list_notations` | Доступные нотации | `name?`, `page?`, `size?` |
 | `get_notation_summary` | Нотация + components + relations | `notationId` |
+
+### Советы для агентов
+
+- Предпочитайте `search_catalog` → `search_model` → `get_*` вместо массовых `list_*` при поиске по имени.
+- Hit’ы поиска без `attrs` и canvas диаграммы; `get_*` — только для выбранных id.
+- `limit` по умолчанию 20 (макс. 50). Связи ищутся по именам source/target (у link нет поля name).
 
 ## Tools записи (`models:write`)
 

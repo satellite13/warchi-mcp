@@ -20,6 +20,8 @@ Known `code` values: `BATCH_SAVE_CONFLICT`, `LOCKED_BY_OTHER`, `model_not_allowe
 
 | Tool | Purpose | Main args |
 |------|---------|-----------|
+| `search_catalog` | Slim search models/notations by name | `q`, `kinds?`, `limit?` |
+| `search_model` | Slim search nodes/links/diagrams in a model | `modelId`, `q`, `kinds?`, `limit?` |
 | `list_models` | List accessible models | `name?`, `page?`, `size?` |
 | `get_model` | Model metadata | `modelId` |
 | `list_diagrams` | Diagrams of a model | `modelId`, `page?`, `size?` |
@@ -30,6 +32,12 @@ Known `code` values: `BATCH_SAVE_CONFLICT`, `LOCKED_BY_OTHER`, `model_not_allowe
 | `get_link` | Link + attrs | `linkId` |
 | `list_notations` | Accessible notations | `name?`, `page?`, `size?` |
 | `get_notation_summary` | Notation + components + relations | `notationId` |
+
+### Agent tips
+
+- Prefer `search_catalog` → `search_model` → `get_*` over bulk `list_*` when looking up by name.
+- Search hits omit `attrs` and diagram canvas; call `get_*` only for selected ids.
+- Default `limit` is 20 (max 50). Links match by source/target node names (links have no name field).
 
 ## Write tools (`models:write`)
 

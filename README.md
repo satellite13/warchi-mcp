@@ -120,7 +120,7 @@ Details: [`docs/auth.md`](docs/auth.md).
 
 ## Tools (v1)
 
-**Read** (`models:read`): `list_models`, `get_model`, `list_diagrams`, `get_diagram`, `list_nodes`, `get_node`, `list_links`, `get_link`, `list_notations`, `get_notation_summary`
+**Read** (`models:read`): `search_catalog`, `search_model`, `list_models`, `get_model`, `list_diagrams`, `get_diagram`, `list_nodes`, `get_node`, `list_links`, `get_link`, `list_notations`, `get_notation_summary`
 
 **Write** (`models:write`): `create_node`, `update_node`, `delete_node`, `create_link`, `update_link`, `delete_link`, `update_diagram`, `batch_save_model`
 

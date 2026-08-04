@@ -120,7 +120,7 @@ docker build -t warchi-mcp:0.1.0 .
 
 ## Tools (v1)
 
-**Чтение** (`models:read`): `list_models`, `get_model`, `list_diagrams`, `get_diagram`, `list_nodes`, `get_node`, `list_links`, `get_link`, `list_notations`, `get_notation_summary`
+**Чтение** (`models:read`): `search_catalog`, `search_model`, `list_models`, `get_model`, `list_diagrams`, `get_diagram`, `list_nodes`, `get_node`, `list_links`, `get_link`, `list_notations`, `get_notation_summary`
 
 **Запись** (`models:write`): `create_node`, `update_node`, `delete_node`, `create_link`, `update_link`, `delete_link`, `update_diagram`, `batch_save_model`
 
