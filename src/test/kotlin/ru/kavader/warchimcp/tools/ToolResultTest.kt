@@ -51,6 +51,18 @@ class ToolResultTest {
     }
 
     @Test
+    fun `error classifies ambiguous node`() {
+        val json = ToolResult.error(
+            AreposClientException(
+                status = 409,
+                message = "Ambiguous",
+                body = """{"error":"AMBIGUOUS_NODE","candidates":[]}"""
+            )
+        )
+        assertTrue(json.contains("AMBIGUOUS_NODE"))
+    }
+
+    @Test
     fun `error classifies diagram conflict`() {
         val json = ToolResult.error(
             AreposClientException(

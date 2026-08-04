@@ -14,7 +14,7 @@ or:
 { "ok": false, "status": 403, "code": "missing_scope", "message": "...", "details": { } }
 ```
 
-Known `code` values: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTATION_ELEMENT`, `LOCKED_BY_OTHER`, `model_not_allowed`, `missing_scope`, `arepos_error`.
+Known `code` values: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTATION_ELEMENT`, `AMBIGUOUS_NODE`, `LOCKED_BY_OTHER`, `model_not_allowed`, `missing_scope`, `arepos_error`.
 
 ## Read tools (`models:read`)
 
@@ -49,6 +49,7 @@ Known `code` values: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTAT
 | Tool | Purpose | Main args |
 |------|---------|-----------|
 | `create_node` | Create node (notation-aware) | `modelId`, `name`, `nodeTypeId?`, `notationId?`, `componentId?`/`componentName?`, `parentNodeId?`, `attrs?` |
+| `ensure_node` | Idempotent find-or-create node | same as `create_node` → `{node, created}` |
 | `update_node` | Update node | `nodeId`, `name?`, `nodeTypeId?`, `parentNodeId?`, `attrs?` |
 | `delete_node` | Delete node | `nodeId` |
 | `create_link` | Create link (notation-aware) | `modelId`, `sourceId`, `targetId`, `linkTypeId?`, `notationId?`, `relationId?`/`relationName?`, `attrs?` |
@@ -56,6 +57,7 @@ Known `code` values: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTAT
 | `update_link` | Update link | `linkId`, `sourceId?`, `targetId?`, `linkTypeId?`, `attrs?` |
 | `delete_link` | Delete link | `linkId` |
 | `create_diagram` | Create diagram (empty canvas by default) | `modelId`, `name`, `notationId`, `nodeId?`, `version?`, `attrs?` |
+| `ensure_diagram` | Idempotent find-or-create diagram (latest by name) | same as `create_diagram` → `{diagram, created}` |
 | `add_diagram_instances` | Merge/upsert canvas instances | `diagramId`, `nodesJson?`, `edgesJson?`, `baseUpdatedAt?` |
 | `update_diagram` | Update diagram fields/attrs | `diagramId`, `name?`, `version?`, `notationId?`, `nodeId?`, `attrs?` |
 | `batch_save_model` | Atomic batch save (escape hatch) | `modelId`, `requestJson` (BatchSaveRequest), `force?` |
@@ -64,18 +66,23 @@ Known `code` values: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTAT
 
 ### Happy-path landscape recipe (~5 calls)
 
+Prefer `ensure_node` / `ensure_diagram` / `ensure_link` over `create_*` for retries (idempotent).
+
 ```
 search_catalog / search_notation
-create_node(modelId, name, notationId, componentName)   # ×N
+ensure_node(modelId, name, notationId, componentName)   # ×N
 ensure_link(modelId, sourceId, targetId, notationId, relationName)  # ×N
-create_diagram(modelId, name, notationId)
+ensure_diagram(modelId, name, notationId)
 add_diagram_instances(diagramId, nodesJson, edgesJson)  # edges by modelLinkId only
 create_wiki(...)  # optional
 ```
 
 - With `notationId` + `componentName` / `relationName`, arepos resolves type ids and writes `notationComponents` / `notationRelations`.
-- Ambiguous name → `409` / `AMBIGUOUS_NOTATION_ELEMENT` with `candidates`.
+- Ambiguous component/relation name → `409` / `AMBIGUOUS_NOTATION_ELEMENT` with `candidates`.
+- Ambiguous node (multiple matches for model+parent+name) → `409` / `AMBIGUOUS_NODE` with `candidates`.
 - `add_diagram_instances` merges by `modelNodeId` / `modelLinkId`; does not delete untouched instances.
+- `ensure_node` match key: `modelId + parentNodeId + name` (case-insensitive). Notation binding on create only.
+- `ensure_diagram` match key: `modelId + name` → latest non-deleted version. Create defaults empty canvas.
 - `ensure_link` match key: `modelId + sourceId + targetId + linkTypeId` (direction-strict). No DB unique constraint — dual concurrent ensure may race.
 
 ### Conflict handling

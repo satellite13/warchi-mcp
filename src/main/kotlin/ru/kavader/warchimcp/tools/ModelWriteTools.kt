@@ -45,6 +45,40 @@ class ModelWriteTools(
         )
     }
 
+    @McpTool(
+        name = "ensure_node",
+        description = "Idempotent find-or-create node by modelId+parentNodeId+name " +
+            "(case-insensitive). Returns {node, created}. Notation binding " +
+            "(notationId+componentName/componentId) applies on create only; hit does not mutate. " +
+            "Multiple matches → 409 AMBIGUOUS_NODE. No DB unique constraint — dual concurrent ensure may race."
+    )
+    fun ensureNode(
+        @McpToolParam(description = "Model UUID", required = true) modelId: String,
+        @McpToolParam(description = "Node name", required = true) name: String,
+        @McpToolParam(description = "Node type UUID (optional when component binding is set)", required = false)
+        nodeTypeId: String? = null,
+        @McpToolParam(description = "Parent node UUID", required = false) parentNodeId: String? = null,
+        @McpToolParam(description = "JSON attrs string", required = false) attrs: String? = null,
+        @McpToolParam(description = "Notation UUID for component binding", required = false) notationId: String? = null,
+        @McpToolParam(description = "Notation component UUID", required = false) componentId: String? = null,
+        @McpToolParam(description = "Notation component name (requires notationId)", required = false)
+        componentName: String? = null
+    ): String = runTool {
+        api.postJson(
+            "/api/v1/nodes/ensure",
+            mapOf(
+                "modelId" to modelId,
+                "name" to name,
+                "nodeTypeId" to nodeTypeId,
+                "parentNodeId" to parentNodeId,
+                "attrs" to attrs,
+                "notationId" to notationId,
+                "componentId" to componentId,
+                "componentName" to componentName
+            ).filterValues { it != null }
+        )
+    }
+
     @McpTool(name = "update_node", description = "Update an existing node")
     fun updateNode(
         @McpToolParam(description = "Node UUID", required = true) nodeId: String,
@@ -180,6 +214,35 @@ class ModelWriteTools(
     ): String = runTool {
         api.postJson(
             "/api/v1/diagrams",
+            mapOf(
+                "modelId" to modelId,
+                "name" to name,
+                "notationId" to notationId,
+                "nodeId" to nodeId,
+                "version" to (version?.takeIf { it.isNotBlank() } ?: "1.0.0"),
+                "attrs" to (attrs ?: """{"instances":{"nodes":[],"edges":[]}}""")
+            ).filterValues { it != null }
+        )
+    }
+
+    @McpTool(
+        name = "ensure_diagram",
+        description = "Idempotent find-or-create diagram by modelId+name → latest non-deleted version. " +
+            "Returns {diagram, created}. On create defaults version=1.0.0 and empty instances canvas. " +
+            "On hit does not update fields. No DB unique constraint — dual concurrent ensure may race. " +
+            "Then use add_diagram_instances to place nodes/edges."
+    )
+    fun ensureDiagram(
+        @McpToolParam(description = "Model UUID", required = true) modelId: String,
+        @McpToolParam(description = "Diagram name", required = true) name: String,
+        @McpToolParam(description = "Notation UUID", required = true) notationId: String,
+        @McpToolParam(description = "Bound model node UUID", required = false) nodeId: String? = null,
+        @McpToolParam(description = "Diagram version (default 1.0.0 on create)", required = false) version: String? = null,
+        @McpToolParam(description = "JSON attrs string (default empty instances on create)", required = false)
+        attrs: String? = null
+    ): String = runTool {
+        api.postJson(
+            "/api/v1/diagrams/ensure",
             mapOf(
                 "modelId" to modelId,
                 "name" to name,
