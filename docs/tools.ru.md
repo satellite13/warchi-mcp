@@ -14,7 +14,7 @@ English: [`tools.md`](tools.md)
 { "ok": false, "status": 403, "code": "missing_scope", "message": "...", "details": { } }
 ```
 
-Известные `code`: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTATION_ELEMENT`, `LOCKED_BY_OTHER`, `model_not_allowed`, `missing_scope`, `arepos_error`.
+Известные `code`: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTATION_ELEMENT`, `AMBIGUOUS_NODE`, `LOCKED_BY_OTHER`, `model_not_allowed`, `missing_scope`, `arepos_error`.
 
 ## Tools чтения (`models:read`)
 
@@ -49,6 +49,7 @@ English: [`tools.md`](tools.md)
 | Tool | Назначение | Основные аргументы |
 |------|------------|--------------------|
 | `create_node` | Создать узел (notation-aware) | `modelId`, `name`, `nodeTypeId?`, `notationId?`, `componentId?`/`componentName?`, … |
+| `ensure_node` | Идемпотентный find-or-create узла | как `create_node` → `{node, created}` |
 | `update_node` | Обновить узел | `nodeId`, … |
 | `delete_node` | Удалить узел | `nodeId` |
 | `create_link` | Создать связь (notation-aware) | `modelId`, `sourceId`, `targetId`, `linkTypeId?`, `notationId?`, `relationId?`/`relationName?`, … |
@@ -56,6 +57,7 @@ English: [`tools.md`](tools.md)
 | `update_link` | Обновить связь | `linkId`, … |
 | `delete_link` | Удалить связь | `linkId` |
 | `create_diagram` | Создать диаграмму (пустой canvas) | `modelId`, `name`, `notationId`, `nodeId?`, `version?`, `attrs?` |
+| `ensure_diagram` | Идемпотентный find-or-create диаграммы (latest по имени) | как `create_diagram` → `{diagram, created}` |
 | `add_diagram_instances` | Merge/upsert instances на canvas | `diagramId`, `nodesJson?`, `edgesJson?`, `baseUpdatedAt?` |
 | `update_diagram` | Обновить поля/attrs диаграммы | `diagramId`, … |
 | `batch_save_model` | Атомарный batch-save (escape hatch) | `modelId`, `requestJson`, `force?` |
@@ -64,20 +66,27 @@ English: [`tools.md`](tools.md)
 
 ### Happy-path ландшафт (~5 вызовов)
 
+Предпочитайте `ensure_node` / `ensure_diagram` / `ensure_link` вместо `create_*` при ретраях (идемпотентно).
+
 ```
 search_catalog / search_notation
-create_node(..., notationId, componentName)   # ×N
+ensure_node(..., notationId, componentName)   # ×N
 ensure_link(..., notationId, relationName)    # ×N
-create_diagram(...)
+ensure_diagram(...)
 add_diagram_instances(..., edges по modelLinkId)
 create_wiki(...)  # опционально
 ```
+
+- `ensure_node`: ключ `modelId + parentNodeId + name` (case-insensitive); notation binding только при create.
+- `ensure_diagram`: ключ `modelId + name` → latest non-deleted; create — пустой canvas.
+- `ensure_link`: ключ `modelId + sourceId + targetId + linkTypeId` (direction-strict).
 
 ### Конфликты
 
 - Canvas merge: `baseUpdatedAt` → `DIAGRAM_CONFLICT`
 - Batch-save: `baseUpdatedAt` → `BATCH_SAVE_CONFLICT` (без silent overwrite, кроме `force=true`)
 - Неоднозначное имя component/relation → `AMBIGUOUS_NOTATION_ELEMENT`
+- Неоднозначный узел (несколько совпадений model+parent+name) → `AMBIGUOUS_NODE`
 - Блокировки диаграмм → `LOCKED_BY_OTHER`
 
 ## Вне v1

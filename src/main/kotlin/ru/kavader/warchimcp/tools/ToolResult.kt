@@ -46,6 +46,8 @@ object ToolResult {
         when {
             body.contains("AMBIGUOUS_NOTATION_ELEMENT") || message.contains("AMBIGUOUS_NOTATION_ELEMENT") ->
                 root.put("code", "AMBIGUOUS_NOTATION_ELEMENT")
+            body.contains("AMBIGUOUS_NODE") || message.contains("AMBIGUOUS_NODE") ->
+                root.put("code", "AMBIGUOUS_NODE")
             body.contains("DIAGRAM_CONFLICT") || message.contains("DIAGRAM_CONFLICT") ->
                 root.put("code", "DIAGRAM_CONFLICT")
             body.contains("BATCH_SAVE_CONFLICT") ||
