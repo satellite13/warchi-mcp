@@ -1,0 +1,12 @@
+warchi-mcp installed.
+
+1. Cluster service:
+   http://{{ include "warchi-mcp.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/mcp
+
+2. Port-forward for local MCP clients:
+   kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "warchi-mcp.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+
+3. Health:
+   curl http://127.0.0.1:{{ .Values.service.port }}/actuator/health
+
+AREPOS_BASE_URL={{ .Values.arepos.baseUrl }}

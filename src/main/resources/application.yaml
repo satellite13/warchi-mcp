@@ -1,0 +1,31 @@
+server:
+  port: ${PORT:8090}
+
+spring:
+  application:
+    name: warchi-mcp
+  ai:
+    mcp:
+      server:
+        name: warchi-mcp
+        version: 0.1.0
+        type: SYNC
+        protocol: STREAMABLE
+        annotation-scanner:
+          enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+warchi:
+  mcp:
+    arepos-base-url: ${AREPOS_BASE_URL:http://localhost:8080}
+    connect-timeout: ${AREPOS_CONNECT_TIMEOUT:5s}
+    read-timeout: ${AREPOS_READ_TIMEOUT:60s}
+
+logging:
+  level:
+    ru.kavader.warchimcp: INFO
