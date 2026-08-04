@@ -32,12 +32,15 @@ Known `code` values: `BATCH_SAVE_CONFLICT`, `LOCKED_BY_OTHER`, `model_not_allowe
 | `get_link` | Link + attrs | `linkId` |
 | `list_notations` | Accessible notations | `name?`, `page?`, `size?` |
 | `get_notation_summary` | Notation + components + relations | `notationId` |
+| `list_wiki` | List wiki docs for model/diagram/node/component | `modelId?`, `diagramId?`, `nodeId?`, `componentId?`, … |
+| `get_wiki` | Read wiki markdown by `fileId` | `fileId` |
 
 ### Agent tips
 
 - Prefer `search_catalog` → `search_model` → `get_*` over bulk `list_*` when looking up by name.
 - Search hits omit `attrs` and diagram canvas; call `get_*` only for selected ids.
 - Default `limit` is 20 (max 50). Links match by source/target node names (links have no name field).
+- Wiki: `list_wiki` → `get_wiki` for content; create/update needs MinIO/file storage enabled on arepos.
 
 ## Write tools (`models:write`)
 
@@ -51,6 +54,8 @@ Known `code` values: `BATCH_SAVE_CONFLICT`, `LOCKED_BY_OTHER`, `model_not_allowe
 | `delete_link` | Delete link | `linkId` |
 | `update_diagram` | Update diagram fields/attrs | `diagramId`, `name?`, `version?`, `notationId?`, `nodeId?`, `attrs?` |
 | `batch_save_model` | Atomic batch save | `modelId`, `requestJson` (BatchSaveRequest), `force?` |
+| `create_wiki` | Upload markdown, register ref, set `attrs.documentFileId` | `entityKind`, `entityId`, `content`, `filename?`, `modelId?`, `notationId?` |
+| `update_wiki` | Replace markdown content | `fileId`, `content`, `filename?` |
 
 ### Conflict handling
 
@@ -60,4 +65,4 @@ Known `code` values: `BATCH_SAVE_CONFLICT`, `LOCKED_BY_OTHER`, `model_not_allowe
 
 ## Out of scope (v1)
 
-Notation CRUD, resource shares, files/MinIO, OEF import, admin endpoints, stdio transport.
+Notation CRUD, resource shares, binary file upload UI, OEF import, admin endpoints, stdio transport.

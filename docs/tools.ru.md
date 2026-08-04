@@ -32,12 +32,15 @@ English: [`tools.md`](tools.md)
 | `get_link` | Связь + attrs | `linkId` |
 | `list_notations` | Доступные нотации | `name?`, `page?`, `size?` |
 | `get_notation_summary` | Нотация + components + relations | `notationId` |
+| `list_wiki` | Список wiki для model/diagram/node/component | `modelId?`, `diagramId?`, `nodeId?`, `componentId?`, … |
+| `get_wiki` | Прочитать markdown wiki по `fileId` | `fileId` |
 
 ### Советы для агентов
 
 - Предпочитайте `search_catalog` → `search_model` → `get_*` вместо массовых `list_*` при поиске по имени.
 - Hit’ы поиска без `attrs` и canvas диаграммы; `get_*` — только для выбранных id.
 - `limit` по умолчанию 20 (макс. 50). Связи ищутся по именам source/target (у link нет поля name).
+- Wiki: `list_wiki` → `get_wiki` для контента; create/update требуют включённого file storage (MinIO) в arepos.
 
 ## Tools записи (`models:write`)
 
@@ -51,6 +54,8 @@ English: [`tools.md`](tools.md)
 | `delete_link` | Удалить связь | `linkId` |
 | `update_diagram` | Обновить поля/attrs диаграммы | `diagramId`, `name?`, `version?`, `notationId?`, `nodeId?`, `attrs?` |
 | `batch_save_model` | Атомарный batch-save | `modelId`, `requestJson` (BatchSaveRequest), `force?` |
+| `create_wiki` | Загрузить markdown, зарегистрировать ref, выставить `attrs.documentFileId` | `entityKind`, `entityId`, `content`, `filename?`, `modelId?`, `notationId?` |
+| `update_wiki` | Заменить markdown | `fileId`, `content`, `filename?` |
 
 ### Конфликты
 
@@ -60,4 +65,4 @@ English: [`tools.md`](tools.md)
 
 ## Вне v1
 
-CRUD нотаций, шаринг, файлы/MinIO, OEF import, admin endpoints, stdio transport.
+CRUD нотаций, шаринг, бинарный upload UI, OEF import, admin endpoints, stdio transport.

@@ -40,6 +40,21 @@ class AreposApiClient(
         }
     }
 
+    /** Download file/markdown body (bytes decoded as UTF-8). */
+    fun getRawText(path: String, query: Map<String, Any?> = emptyMap()): String {
+        val uri = buildUri(path, query)
+        return withAuthRetry { token ->
+            val bytes = restClient.get()
+                .uri(uri)
+                .header("Authorization", "Bearer $token")
+                .accept(MediaType.ALL)
+                .retrieve()
+                .body(ByteArray::class.java)
+                ?: ByteArray(0)
+            String(bytes, Charsets.UTF_8)
+        }
+    }
+
     private fun exchange(
         method: String,
         path: String,
