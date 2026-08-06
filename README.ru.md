@@ -9,8 +9,8 @@ English version: [`README.md`](README.md)
 ## Возможности
 
 - Удалённый MCP-сервер (Streamable HTTP) для Cursor и других MCP-клиентов
-- Авторизация персональным API-ключом (`warchi_ak_…`) со scopes `models:read` / `models:write`
-- Опциональный allowlist моделей на ключе (enforcement в arepos)
+- Авторизация персональным API-ключом (`warchi_ak_…`) с `mode=all` (глобальные scopes) или `mode=grants` (read/write на каждую модель)
+- Один ключ на агента — смешанные права по моделям через grants, а не несколько секретов
 - Exchange ключа на short-lived JWT (`tokenType=mcp_access`) — ключ не уходит на каждый REST-вызов
 - Curated read/write tools для моделей, диаграмм, узлов, связей и сводки нотаций
 - Структурированные ошибки tool result: `LOCKED_BY_OTHER`, `BATCH_SAVE_CONFLICT`, `missing_scope`, `model_not_allowed`
@@ -110,7 +110,7 @@ docker build -t warchi-mcp:0.1.0 .
 
 ## Поток авторизации
 
-1. Пользователь создаёт API-ключ в wArchi (scopes + опционально UUID моделей).
+1. Пользователь создаёт API-ключ в wArchi (`mode=all` или `mode=grants` с правами на каждую модель).
 2. MCP-клиент передаёт ключ в `warchi-mcp`.
 3. Сервер вызывает `POST /api/v1/auth/api-keys/exchange` в arepos.
 4. Tools ходят в arepos `/api/v1/*` с short-lived JWT.
@@ -151,8 +151,8 @@ docker run --rm -p 8090:8090 \
 - [ ] `POST /api/v1/auth/api-keys/exchange` работает в arepos с тестовым ключом
 - [ ] MCP-клиент успешно вызывает `list_models`
 - [ ] Отозванный ключ → exchange 401
-- [ ] Запись без `models:write` → `missing_scope`
-- [ ] Allowlist не пускает к чужим моделям → `model_not_allowed`
+- [ ] Запись без `models:write` на целевой модели → `missing_scope`
+- [ ] Ключ с `mode=grants` не пускает к моделям вне grants → `model_not_allowed`
 
 ## Руководство по open source
 

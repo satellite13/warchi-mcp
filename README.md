@@ -9,8 +9,8 @@ The project is built with Kotlin + Spring Boot and Spring AI MCP. It has **no da
 ## Features
 
 - Remote MCP server (Streamable HTTP) for Cursor and other MCP clients
-- Personal API key auth (`warchi_ak_…`) with scopes `models:read` / `models:write`
-- Optional per-key model allowlist (enforced by arepos)
+- Personal API key auth (`warchi_ak_…`) with `mode=all` (global scopes) or `mode=grants` (per-model read/write)
+- One key per agent — mixed model rights via grants, not multiple secrets
 - Short-lived JWT exchange (`tokenType=mcp_access`) — keys are not sent on every REST call
 - Curated read/write tools for models, diagrams, nodes, links, and notation summaries
 - Structured tool errors for `LOCKED_BY_OTHER`, `BATCH_SAVE_CONFLICT`, `missing_scope`, `model_not_allowed`
@@ -110,7 +110,7 @@ Also accepted: `X-Api-Key: warchi_ak_…`.
 
 ## Auth Flow
 
-1. User creates an API key in wArchi (scopes + optional model UUIDs).
+1. User creates an API key in wArchi (`mode=all` or `mode=grants` with per-model scopes).
 2. MCP client sends the key to `warchi-mcp`.
 3. Server calls `POST /api/v1/auth/api-keys/exchange` on arepos.
 4. Tools call arepos `/api/v1/*` with the short-lived JWT.
@@ -171,8 +171,8 @@ docker run --rm -p 8090:8090 \
 - [ ] `POST /api/v1/auth/api-keys/exchange` works against arepos with a test key
 - [ ] MCP client can call `list_models`
 - [ ] Revoked key → exchange returns 401
-- [ ] Write without `models:write` → `missing_scope`
-- [ ] Allowlisted key cannot access other models → `model_not_allowed`
+- [ ] Write without `models:write` on the target model → `missing_scope`
+- [ ] `mode=grants` key cannot access non-granted models → `model_not_allowed`
 
 ## Open Source Guide
 

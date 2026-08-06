@@ -29,6 +29,8 @@ If no private channel is available yet, create one before public release and upd
 - Do not log API keys, JWTs, or full `Authorization` headers in application logs
 - Point `AREPOS_BASE_URL` at a trusted arepos instance (prefer private network / mTLS where possible)
 - Revoke compromised keys immediately in wArchi Profile
-- Use least-privilege scopes (`models:read` when write is not needed) and optional model allowlists
+- Use least privilege: `mode=all` with `models:read` when write is not needed, or `mode=grants` with read-only on most models and write only where required
+- One `warchi_ak_…` secret per agent; prefer per-model grants over issuing multiple keys
+- Deactivating a user soft-blocks exchange via `isActive` (keys are not auto-revoked — revoke explicitly if needed)
 - Keep dependencies and base images updated
 - Restrict network access so only intended clients reach the MCP endpoint
