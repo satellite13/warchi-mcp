@@ -39,6 +39,8 @@ src/main/kotlin/ru/kavader/warchimcp/
 └── tools/
     ├── ModelReadTools.kt
     ├── ModelWriteTools.kt
+    ├── SearchTools.kt          # search_catalog / search_model / search_notation
+    ├── WikiTools.kt            # list/get/create/update wiki
     └── ToolResult.kt           # ok/error JSON envelope for tools
 ```
 
