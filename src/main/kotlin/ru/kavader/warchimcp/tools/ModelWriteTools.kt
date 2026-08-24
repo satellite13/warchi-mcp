@@ -292,8 +292,9 @@ class ModelWriteTools(
         name = "update_diagram",
         description = "Update diagram fields (name/version/notation/node/attrs). " +
             "For incremental canvas edits prefer add_diagram_instances. " +
-            "For conflict-aware bulk edits prefer batch-save. " +
-            "Returns structured errors for LOCKED_BY_OTHER / BATCH_SAVE_CONFLICT when applicable."
+            "For conflict-aware bulk edits prefer batch_save_model. " +
+            "Returns 409 CONFLICT when the diagram is not the latest version by name " +
+            "or the name+version combination already exists."
     )
     fun updateDiagram(
         @McpToolParam(description = "Diagram UUID", required = true) diagramId: String,

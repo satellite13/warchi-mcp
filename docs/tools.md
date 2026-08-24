@@ -14,7 +14,7 @@ or:
 { "ok": false, "status": 403, "code": "missing_scope", "message": "...", "details": { } }
 ```
 
-Known `code` values: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTATION_ELEMENT`, `AMBIGUOUS_NODE`, `LOCKED_BY_OTHER`, `model_not_allowed`, `missing_scope`, `arepos_error`.
+Known `code` values: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTATION_ELEMENT`, `AMBIGUOUS_NODE`, `model_not_allowed`, `missing_scope`, `arepos_error`.
 
 ## Read tools (`models:read`)
 
@@ -33,11 +33,12 @@ Known `code` values: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTAT
 | `get_link` | Link + attrs | `linkId` |
 | `list_notations` | Accessible notations | `name?`, `page?`, `size?` |
 | `get_notation_summary` | Notation + components + relations (heavy) | `notationId` |
-| `list_wiki` | List wiki docs for model/diagram/node/component | `modelId?`, `diagramId?`, `nodeId?`, `componentId?`, … |
+| `list_wiki` | List wiki docs for model/diagram/node/component (items: fileId, label, entityType, entityId) | `modelId?`, `diagramId?`, `nodeId?`, `componentId?`, … |
 | `get_wiki` | Read wiki markdown by `fileId` | `fileId` |
 
 ### Agent tips
 
+- List envelopes: `list_models` → `{items, total, page, size}`; `list_diagrams` / `list_nodes` / `list_links` / `list_notations` → `{content, page: {number, size, totalElements, totalPages}}`.
 - Prefer `search_catalog` → `search_notation` / `search_model` → `get_*` over bulk `list_*` when looking up by name.
 - Prefer `search_notation` over `get_notation_summary` for discovery (Archimate has dozens of components).
 - Search hits omit `attrs` and diagram canvas; call `get_*` only for selected ids.
@@ -90,7 +91,8 @@ create_wiki(...)  # optional
 - Prefer `add_diagram_instances` with `baseUpdatedAt` for canvas merges → `DIAGRAM_CONFLICT` on stale base
 - Prefer `batch_save_model` with `baseUpdatedAt` for collaborative multi-entity edits → `BATCH_SAVE_CONFLICT`
 - **No silent overwrite** unless `force=true` is explicitly requested on batch-save
-- Diagram edit locks surface as `LOCKED_BY_OTHER` when arepos reports that reason
+- `update_diagram` returns `409 CONFLICT` when the diagram is not the latest version by name or name+version is duplicated
+- Diagram edit locks (`/api/v1/diagram-locks/*`, advisory, `LOCKED_BY_OTHER`) are NOT called by these tools; concurrent UI editors may modify the same diagram
 
 ## Out of scope (v1)
 

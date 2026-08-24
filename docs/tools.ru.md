@@ -14,7 +14,7 @@ English: [`tools.md`](tools.md)
 { "ok": false, "status": 403, "code": "missing_scope", "message": "...", "details": { } }
 ```
 
-Известные `code`: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTATION_ELEMENT`, `AMBIGUOUS_NODE`, `LOCKED_BY_OTHER`, `model_not_allowed`, `missing_scope`, `arepos_error`.
+Известные `code`: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTATION_ELEMENT`, `AMBIGUOUS_NODE`, `model_not_allowed`, `missing_scope`, `arepos_error`.
 
 ## Tools чтения (`models:read`)
 
@@ -33,11 +33,12 @@ English: [`tools.md`](tools.md)
 | `get_link` | Связь + attrs | `linkId` |
 | `list_notations` | Доступные нотации | `name?`, `page?`, `size?` |
 | `get_notation_summary` | Нотация + components + relations (тяжёлый) | `notationId` |
-| `list_wiki` | Список wiki для model/diagram/node/component | `modelId?`, `diagramId?`, `nodeId?`, `componentId?`, … |
+| `list_wiki` | Список wiki для model/diagram/node/component (fileId, label, entityType, entityId) | `modelId?`, `diagramId?`, `nodeId?`, `componentId?`, … |
 | `get_wiki` | Прочитать markdown wiki по `fileId` | `fileId` |
 
 ### Советы для агентов
 
+- Овервелы списков: `list_models` → `{items, total, page, size}`; `list_diagrams` / `list_nodes` / `list_links` / `list_notations` → `{content, page: {number, size, totalElements, totalPages}}`.
 - Предпочитайте `search_catalog` → `search_notation` / `search_model` → `get_*` вместо массовых `list_*`.
 - Для discovery компонентов/relations используйте `search_notation`, а не `get_notation_summary`.
 - Hit’ы поиска без `attrs` и canvas; `get_*` — только для выбранных id.
@@ -87,7 +88,8 @@ create_wiki(...)  # опционально
 - Batch-save: `baseUpdatedAt` → `BATCH_SAVE_CONFLICT` (без silent overwrite, кроме `force=true`)
 - Неоднозначное имя component/relation → `AMBIGUOUS_NOTATION_ELEMENT`
 - Неоднозначный узел (несколько совпадений model+parent+name) → `AMBIGUOUS_NODE`
-- Блокировки диаграмм → `LOCKED_BY_OTHER`
+- `update_diagram` → `409 CONFLICT`, если диаграмма не последней версии по имени или дубль name+version
+- Блокировки диаграмм (`/api/v1/diagram-locks/*`, advisory, `LOCKED_BY_OTHER`) инструментами **не** вызываются; в UI диаграмму могут менять параллельно
 
 ## Вне v1
 
