@@ -16,7 +16,7 @@ node('dockerhost') {
                 branches         : [[name: LMRU_DEPLOY_BRANCH]],
                 userRemoteConfigs: [[
                                             url          : LMRU_DEPLOY_REPO,
-                                            credentialsId: 'lm-sa-warchi'
+                                            credentialsId: 'jenkins-gitlab-integration-system'
                                     ]],
                 extensions       : [[$class: 'CloneOption', shallow: true, depth: 1, noTags: true]]
         ])
