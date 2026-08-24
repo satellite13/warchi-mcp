@@ -64,6 +64,7 @@ English: [`tools.md`](tools.md)
 | `batch_save_model` | Атомарный batch-save (escape hatch) | `modelId`, `requestJson`, `force?` |
 | `create_wiki` | Загрузить markdown + ref | `entityKind`, `entityId`, `content`, … |
 | `update_wiki` | Заменить markdown | `fileId`, `content`, … |
+| `ensure_custom_properties` | Создаёт отсутствующие customProperties нотационного компонента (add-if-missing по имени, существующие не трогаются) + зеркалирует на node type компонента; нужна права на редактирование нотации | `componentId`, `propertiesJson`, `nodeTypeId?` |
 
 ### Happy-path ландшафт (~5 вызовов)
 
@@ -81,6 +82,7 @@ create_wiki(...)  # опционально
 - `ensure_node`: ключ `modelId + parentNodeId + name` (case-insensitive); notation binding только при create.
 - `ensure_diagram`: ключ `modelId + name` → latest non-deleted; create — пустой canvas.
 - `ensure_link`: ключ `modelId + sourceId + targetId + linkTypeId` (direction-strict).
+- `ensure_custom_properties` идемпотентен: читает текущие `attrs`, дописывает только определения с отсутствующим `name` (существующие определения не мутирует) и PUT'ит весь `attrs` (arepos заменяет `attrs` целиком). Тот же merge применяется к node type компонента — wArchi показывает значения свойств в двух скоупах (`node.attrs.typeProperties` / `node.attrs.componentProperties`). Поля определения: `name` (required, ключ матчинга), `type` (string|number|boolean|enum, по умолчанию string), `required?`, `system?`, `regex?`, `min?`, `max?`, `maxLength?`, `enumValues?` (non-empty для enum), `id?` (генерируется, если не задан), `defaultValue?`, `interactive?`/`interactiveKind?`/`interactiveIcon?`.
 
 ### Конфликты
 
@@ -93,4 +95,4 @@ create_wiki(...)  # опционально
 
 ## Вне v1
 
-CRUD нотаций, шаринг, бинарный upload UI, OEF import, admin endpoints, stdio transport, `layout_diagram`, graph neighbors, enforce relation-rules, `delete_diagram`.
+CRUD нотаций (единственное исключение — `ensure_custom_properties`), шаринг, бинарный upload UI, OEF import, admin endpoints, stdio transport, `layout_diagram`, graph neighbors, enforce relation-rules, `delete_diagram`.

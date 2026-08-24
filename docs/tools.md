@@ -64,6 +64,7 @@ Known `code` values: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTAT
 | `batch_save_model` | Atomic batch save (escape hatch) | `modelId`, `requestJson` (BatchSaveRequest), `force?` |
 | `create_wiki` | Upload markdown, register ref, set `attrs.documentFileId` | `entityKind`, `entityId`, `content`, `filename?`, `modelId?`, `notationId?` |
 | `update_wiki` | Replace markdown content | `fileId`, `content`, `filename?` |
+| `ensure_custom_properties` | Ensure customProperties exist on a notation component (create-if-missing by name, existing untouched) and mirror them onto the component's node type; requires notation edit permission | `componentId`, `propertiesJson`, `nodeTypeId?` |
 
 ### Happy-path landscape recipe (~5 calls)
 
@@ -85,6 +86,7 @@ create_wiki(...)  # optional
 - `ensure_node` match key: `modelId + parentNodeId + name` (case-insensitive). Notation binding on create only.
 - `ensure_diagram` match key: `modelId + name` → latest non-deleted version. Create defaults empty canvas.
 - `ensure_link` match key: `modelId + sourceId + targetId + linkTypeId` (direction-strict). No DB unique constraint — dual concurrent ensure may race.
+- `ensure_custom_properties` is idempotent: it reads current `attrs`, appends only the definitions whose `name` is missing (existing definitions are never mutated), and PUTs the full `attrs` back (arepos replaces `attrs` wholesale). The same merge is applied to the component's own node type — wArchi shows property values in two scopes (`node.attrs.typeProperties` / `node.attrs.componentProperties`). Property definition fields: `name` (required, match key), `type` (string|number|boolean|enum, default string), `required?`, `system?`, `regex?`, `min?`, `max?`, `maxLength?`, `enumValues?` (non-empty for enum), `id?` (generated when absent), `defaultValue?`, `interactive?`/`interactiveKind?`/`interactiveIcon?`.
 
 ### Conflict handling
 
@@ -96,4 +98,4 @@ create_wiki(...)  # optional
 
 ## Out of scope (v1)
 
-Notation CRUD, resource shares, binary file upload UI, OEF import, admin endpoints, stdio transport, `layout_diagram`, graph neighbors, relation-rules enforce on create, `delete_diagram`.
+Notation CRUD (the single exception is `ensure_custom_properties`), resource shares, binary file upload UI, OEF import, admin endpoints, stdio transport, `layout_diagram`, graph neighbors, relation-rules enforce on create, `delete_diagram`.

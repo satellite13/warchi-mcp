@@ -41,6 +41,8 @@ src/main/kotlin/ru/kavader/warchimcp/
     ├── ModelWriteTools.kt
     ├── SearchTools.kt          # search_catalog / search_model / search_notation
     ├── WikiTools.kt            # list/get/create/update wiki
+    ├── NotationTools.kt        # ensure_custom_properties (notation component + node type attrs merge)
+    ├── CustomProperties.kt     # pure add-if-missing merge logic for attrs.customProperties
     └── ToolResult.kt           # ok/error JSON envelope for tools
 ```
 
@@ -73,7 +75,7 @@ Feature work that spans components uses a shared branch name, e.g. `feat/warchi-
 
 ## Out of Scope (v1)
 
-- Notation CRUD, shares, OEF import, admin tools
+- Notation CRUD (the single exception is `ensure_custom_properties` — add-if-missing merge of `attrs.customProperties` on a notation component + its node type), shares, OEF import, admin tools
 - Stdio transport
 - Own persistence for keys or sessions
 - `layout_diagram`, graph neighbors, relation-rules enforce on create, `delete_diagram`
