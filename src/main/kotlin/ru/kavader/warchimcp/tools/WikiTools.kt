@@ -19,7 +19,7 @@ class WikiTools(
     @McpTool(
         name = "list_wiki",
         description = "List wiki documents linked to a model/diagram/node/component (or other entity). " +
-            "Returns slim items: fileId, label, entityType, entityId. Requires models:read."
+            "Returns slim items: fileId, label, entityType, entityId, entityName, parentName. Requires models:read."
     )
     fun listWiki(
         @McpToolParam(description = "Model UUID filter", required = false) modelId: String? = null,

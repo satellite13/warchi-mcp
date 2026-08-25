@@ -8,6 +8,15 @@ import ru.kavader.warchimcp.client.AreposClientException
 object ToolResult {
     private val mapper = ObjectMapper().findAndRegisterModules()
 
+    /**
+     * Raw U+2028/U+2029 are legal inside JSON strings but intermittently corrupt the
+     * streamable-HTTP SSE framing for large tool results (response truncated at the
+     * separator). Replace with the equivalent \u2028/\u2029 escapes — lossless for
+     * JSON consumers, safe for line-based transports.
+     */
+    private fun transportSafe(s: String): String =
+        s.replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
+
     fun ok(payload: Any?): String {
         val root = mapper.createObjectNode()
         root.put("ok", true)
@@ -17,7 +26,7 @@ object ToolResult {
             is String -> root.put("data", payload)
             else -> root.set<JsonNode>("data", mapper.valueToTree(payload))
         }
-        return mapper.writeValueAsString(root)
+        return transportSafe(mapper.writeValueAsString(root))
     }
 
     fun error(ex: Exception): String {
@@ -37,7 +46,7 @@ object ToolResult {
         } else {
             root.put("message", ex.message ?: ex::class.java.simpleName)
         }
-        return mapper.writeValueAsString(root)
+        return transportSafe(mapper.writeValueAsString(root))
     }
 
     private fun classify(ex: AreposClientException, root: ObjectNode) {

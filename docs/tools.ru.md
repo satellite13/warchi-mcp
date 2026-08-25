@@ -14,7 +14,7 @@ English: [`tools.md`](tools.md)
 { "ok": false, "status": 403, "code": "missing_scope", "message": "...", "details": { } }
 ```
 
-Известные `code`: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTATION_ELEMENT`, `AMBIGUOUS_NODE`, `LOCKED_BY_OTHER`, `model_not_allowed`, `missing_scope`, `arepos_error`.
+Известные `code`: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTATION_ELEMENT`, `AMBIGUOUS_NODE`, `model_not_allowed`, `missing_scope`, `arepos_error`.
 
 ## Tools чтения (`models:read`)
 
@@ -33,11 +33,12 @@ English: [`tools.md`](tools.md)
 | `get_link` | Связь + attrs | `linkId` |
 | `list_notations` | Доступные нотации | `name?`, `page?`, `size?` |
 | `get_notation_summary` | Нотация + components + relations (тяжёлый) | `notationId` |
-| `list_wiki` | Список wiki для model/diagram/node/component | `modelId?`, `diagramId?`, `nodeId?`, `componentId?`, … |
+| `list_wiki` | Список wiki для model/diagram/node/component (fileId, label, entityType, entityId) | `modelId?`, `diagramId?`, `nodeId?`, `componentId?`, … |
 | `get_wiki` | Прочитать markdown wiki по `fileId` | `fileId` |
 
 ### Советы для агентов
 
+- Овервелы списков: `list_models` → `{items, total, page, size}`; `list_diagrams` / `list_nodes` / `list_links` / `list_notations` → `{content, page: {number, size, totalElements, totalPages}}`.
 - Предпочитайте `search_catalog` → `search_notation` / `search_model` → `get_*` вместо массовых `list_*`.
 - Для discovery компонентов/relations используйте `search_notation`, а не `get_notation_summary`.
 - Hit’ы поиска без `attrs` и canvas; `get_*` — только для выбранных id.
@@ -63,6 +64,7 @@ English: [`tools.md`](tools.md)
 | `batch_save_model` | Атомарный batch-save (escape hatch) | `modelId`, `requestJson`, `force?` |
 | `create_wiki` | Загрузить markdown + ref | `entityKind`, `entityId`, `content`, … |
 | `update_wiki` | Заменить markdown | `fileId`, `content`, … |
+| `ensure_custom_properties` | Создаёт отсутствующие customProperties нотационного компонента (add-if-missing по имени, существующие не трогаются) + зеркалирует на node type компонента; нужна права на редактирование нотации | `componentId`, `propertiesJson`, `nodeTypeId?` |
 
 ### Happy-path ландшафт (~5 вызовов)
 
@@ -80,6 +82,7 @@ create_wiki(...)  # опционально
 - `ensure_node`: ключ `modelId + parentNodeId + name` (case-insensitive); notation binding только при create.
 - `ensure_diagram`: ключ `modelId + name` → latest non-deleted; create — пустой canvas.
 - `ensure_link`: ключ `modelId + sourceId + targetId + linkTypeId` (direction-strict).
+- `ensure_custom_properties` идемпотентен: читает текущие `attrs`, дописывает только определения с отсутствующим `name` (существующие определения не мутирует) и PUT'ит весь `attrs` (arepos заменяет `attrs` целиком). Тот же merge применяется к node type компонента — wArchi показывает значения свойств в двух скоупах (`node.attrs.typeProperties` / `node.attrs.componentProperties`). Поля определения: `name` (required, ключ матчинга), `type` (string|number|boolean|enum, по умолчанию string), `required?`, `system?`, `regex?`, `min?`, `max?`, `maxLength?`, `enumValues?` (non-empty для enum), `id?` (генерируется, если не задан), `defaultValue?`, `interactive?`/`interactiveKind?`/`interactiveIcon?`.
 
 ### Конфликты
 
@@ -87,8 +90,9 @@ create_wiki(...)  # опционально
 - Batch-save: `baseUpdatedAt` → `BATCH_SAVE_CONFLICT` (без silent overwrite, кроме `force=true`)
 - Неоднозначное имя component/relation → `AMBIGUOUS_NOTATION_ELEMENT`
 - Неоднозначный узел (несколько совпадений model+parent+name) → `AMBIGUOUS_NODE`
-- Блокировки диаграмм → `LOCKED_BY_OTHER`
+- `update_diagram` → `409 CONFLICT`, если диаграмма не последней версии по имени или дубль name+version
+- Блокировки диаграмм (`/api/v1/diagram-locks/*`, advisory, `LOCKED_BY_OTHER`) инструментами **не** вызываются; в UI диаграмму могут менять параллельно
 
 ## Вне v1
 
-CRUD нотаций, шаринг, бинарный upload UI, OEF import, admin endpoints, stdio transport, `layout_diagram`, graph neighbors, enforce relation-rules, `delete_diagram`.
+CRUD нотаций (единственное исключение — `ensure_custom_properties`), шаринг, бинарный upload UI, OEF import, admin endpoints, stdio transport, `layout_diagram`, graph neighbors, enforce relation-rules, `delete_diagram`.
