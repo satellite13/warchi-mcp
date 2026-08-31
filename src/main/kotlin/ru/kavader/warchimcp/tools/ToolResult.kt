@@ -46,10 +46,10 @@ object ToolResult {
         } else {
             root.put("message", ex.message ?: ex::class.java.simpleName)
         }
-         return transportSafe(mapper.writeValueAsString(root))
-     }
+        return transportSafe(mapper.writeValueAsString(root))
+    }
 
-     private fun classify(ex: AreposClientException, root: ObjectNode) {
+    private fun classify(ex: AreposClientException, root: ObjectNode) {
         val body = ex.body.orEmpty()
         val message = ex.message
         when {
