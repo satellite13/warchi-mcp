@@ -15,7 +15,7 @@ class ModelReadTools(
         @McpToolParam(description = "Optional name filter", required = false) name: String? = null,
         @McpToolParam(description = "Page number (0-based)", required = false) page: Int? = 0,
         @McpToolParam(description = "Page size", required = false) size: Int? = 50
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.getJson(
             "/api/v1/models",
             mapOf(
@@ -29,7 +29,7 @@ class ModelReadTools(
     @McpTool(name = "get_model", description = "Get model metadata by id")
     fun getModel(
         @McpToolParam(description = "Model UUID", required = true) modelId: String
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.getJson("/api/v1/models/$modelId")
     }
 
@@ -38,7 +38,7 @@ class ModelReadTools(
         @McpToolParam(description = "Model UUID", required = true) modelId: String,
         @McpToolParam(description = "Page number (0-based)", required = false) page: Int? = 0,
         @McpToolParam(description = "Page size", required = false) size: Int? = 50
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.getJson(
             "/api/v1/diagrams",
             mapOf(
@@ -52,7 +52,7 @@ class ModelReadTools(
     @McpTool(name = "get_diagram", description = "Get diagram metadata and attrs by id")
     fun getDiagram(
         @McpToolParam(description = "Diagram UUID", required = true) diagramId: String
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.getJson("/api/v1/diagrams/$diagramId")
     }
 
@@ -61,7 +61,7 @@ class ModelReadTools(
         @McpToolParam(description = "Model UUID", required = true) modelId: String,
         @McpToolParam(description = "Page number (0-based)", required = false) page: Int? = 0,
         @McpToolParam(description = "Page size", required = false) size: Int? = 100
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.getJson(
             "/api/v1/nodes",
             mapOf(
@@ -75,7 +75,7 @@ class ModelReadTools(
     @McpTool(name = "get_node", description = "Get node by id including attrs")
     fun getNode(
         @McpToolParam(description = "Node UUID", required = true) nodeId: String
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.getJson("/api/v1/nodes/$nodeId")
     }
 
@@ -84,7 +84,7 @@ class ModelReadTools(
         @McpToolParam(description = "Model UUID", required = true) modelId: String,
         @McpToolParam(description = "Page number (0-based)", required = false) page: Int? = 0,
         @McpToolParam(description = "Page size", required = false) size: Int? = 100
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.getJson(
             "/api/v1/links",
             mapOf(
@@ -98,7 +98,7 @@ class ModelReadTools(
     @McpTool(name = "get_link", description = "Get link by id including attrs")
     fun getLink(
         @McpToolParam(description = "Link UUID", required = true) linkId: String
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.getJson("/api/v1/links/$linkId")
     }
 
@@ -107,7 +107,7 @@ class ModelReadTools(
         @McpToolParam(description = "Optional name filter", required = false) name: String? = null,
         @McpToolParam(description = "Page number (0-based)", required = false) page: Int? = 0,
         @McpToolParam(description = "Page size", required = false) size: Int? = 50
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.getJson(
             "/api/v1/notations",
             mapOf(
@@ -124,7 +124,7 @@ class ModelReadTools(
     )
     fun getNotationSummary(
         @McpToolParam(description = "Notation UUID", required = true) notationId: String
-    ): String = runTool {
+    ): String = ToolResult.run {
         val notation = api.getJson("/api/v1/notations/$notationId")
         val components = api.getJson(
             "/api/v1/components",
@@ -140,11 +140,4 @@ class ModelReadTools(
             "relations" to relations
         )
     }
-
-    private fun runTool(block: () -> Any?): String =
-        try {
-            ToolResult.ok(block())
-        } catch (ex: Exception) {
-            ToolResult.error(ex)
-        }
 }

@@ -4,7 +4,7 @@
 #
 # Примеры:
 #   SKIP_CONFIRM=true ./scripts/deploy.sh
-#   BUILD_IMAGE=false IMAGE_TAG=0.1.0 ./scripts/deploy.sh
+#   BUILD_IMAGE=false IMAGE_TAG=0.2.0 ./scripts/deploy.sh
 #
 
 set -euo pipefail
