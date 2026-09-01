@@ -16,10 +16,9 @@ import ru.kavader.warchimcp.client.AreposApiClient
  */
 @Component
 class NotationTools(
-    private val api: AreposApiClient
+    private val api: AreposApiClient,
+    private val mapper: ObjectMapper
 ) {
-    private val mapper = ObjectMapper().findAndRegisterModules()
-
     @McpTool(
         name = "ensure_custom_properties",
         description = "Ensure customProperties are defined on a notation component " +
@@ -42,7 +41,7 @@ class NotationTools(
                 "[{\"name\":\"owner\",\"type\":\"string\",\"required\":false,\"maxLength\":40}]",
             required = true
         ) propertiesJson: String
-    ): String = runTool {
+    ): String = ToolResult.run {
         val definitions = CustomProperties.parseDefinitions(propertiesJson, mapper)
 
         val component = api.getJson("/api/v1/components/$componentId")
@@ -84,11 +83,4 @@ class NotationTools(
             "added" to merge.added,
             "existing" to merge.existing
         )
-
-    private fun runTool(block: () -> Any?): String =
-        try {
-            ToolResult.ok(block())
-        } catch (ex: Exception) {
-            ToolResult.error(ex)
-        }
 }

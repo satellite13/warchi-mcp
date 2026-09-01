@@ -80,7 +80,7 @@ export AREPOS_BASE_URL=http://localhost:8080
 ./gradlew test        # unit tests
 ./gradlew bootJar     # fat JAR
 ./gradlew bootRun     # local run
-docker build -t warchi-mcp:0.1.0 .
+docker build -t warchi-mcp:0.2.0 .
 ```
 
 ## MCP Endpoint
@@ -160,10 +160,10 @@ Typical production layout:
 ### Docker
 
 ```bash
-docker build -t warchi-mcp:0.1.0 .
+docker build -t warchi-mcp:0.2.0 .
 docker run --rm -p 8090:8090 \
   -e AREPOS_BASE_URL=https://api.example.com \
-  warchi-mcp:0.1.0
+  warchi-mcp:0.2.0
 ```
 
 ### Smoke checklist

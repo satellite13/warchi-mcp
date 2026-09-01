@@ -29,7 +29,7 @@ class WikiTools(
         @McpToolParam(description = "Notation UUID filter", required = false) notationId: String? = null,
         @McpToolParam(description = "Node type UUID filter", required = false) nodeTypeId: String? = null,
         @McpToolParam(description = "Link type UUID filter", required = false) linkTypeId: String? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.getJson(
             "/api/v1/documents",
             mapOf(
@@ -50,7 +50,7 @@ class WikiTools(
     )
     fun getWiki(
         @McpToolParam(description = "File UUID of the markdown wiki page", required = true) fileId: String
-    ): String = runTool {
+    ): String = ToolResult.run {
         val content = api.getRawText("/api/v1/files/$fileId")
         mapOf(
             "fileId" to fileId,
@@ -81,7 +81,7 @@ class WikiTools(
             description = "Parent notation UUID (recommended for component)",
             required = false
         ) notationId: String? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         val kind = entityKind.trim().lowercase()
         val safeName = filename?.takeIf { it.isNotBlank() }
             ?: "${kind}-${entityId.take(8)}.md"
@@ -145,7 +145,7 @@ class WikiTools(
         @McpToolParam(description = "File UUID", required = true) fileId: String,
         @McpToolParam(description = "New markdown content", required = true) content: String,
         @McpToolParam(description = "Filename (optional)", required = false) filename: String? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.putJson(
             "/api/v1/files/$fileId/markdown",
             mapOf(
@@ -183,11 +183,4 @@ class WikiTools(
         node.put("documentFileId", fileId)
         return objectMapper.writeValueAsString(node)
     }
-
-    private fun runTool(block: () -> Any?): String =
-        try {
-            ToolResult.ok(block())
-        } catch (ex: Exception) {
-            ToolResult.error(ex)
-        }
 }

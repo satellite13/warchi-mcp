@@ -49,6 +49,14 @@ object ToolResult {
         return transportSafe(mapper.writeValueAsString(root))
     }
 
+    /** Shared try/catch envelope used by all MCP tool classes. */
+    fun run(block: () -> Any?): String =
+        try {
+            ok(block())
+        } catch (ex: Exception) {
+            error(ex)
+        }
+
     private fun classify(ex: AreposClientException, root: ObjectNode) {
         val body = ex.body.orEmpty()
         val message = ex.message
