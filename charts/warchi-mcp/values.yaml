@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: arch/warchi-mcp
   pullPolicy: IfNotPresent
-  tag: "0.2.1"
+  tag: "0.3.0"
 
 imagePullSecrets: []
 nameOverride: ""

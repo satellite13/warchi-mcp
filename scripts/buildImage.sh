@@ -6,7 +6,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_ROOT"
 
 IMAGE_NAME="${IMAGE_NAME:-arch/warchi-mcp}"
-IMAGE_TAG="${IMAGE_TAG:-0.2.1}"
+IMAGE_TAG="${IMAGE_TAG:-0.3.0}"
 
 echo "Building Docker image ${IMAGE_NAME}:${IMAGE_TAG}..."
 docker build -t "${IMAGE_NAME}:${IMAGE_TAG}" -t "${IMAGE_NAME}:latest" .
