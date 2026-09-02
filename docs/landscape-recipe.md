@@ -22,7 +22,7 @@ Prefer **`ensure_*`** over **`create_*`** (`create_node` / `create_link` / `crea
 |------|-----|
 | API key `warchi_ak_…` | Client → MCP (`Authorization` / `X-Api-Key`) |
 | Scope `models:read` | Discovery (`search_*`, `get_*`, `list_wiki`) |
-| Scope `models:write` | `ensure_*`, `add_diagram_instances`, `create_wiki`, … |
+| Scope `models:write` | `ensure_*`, `add_diagram_instances`, `ensure_wiki`, … |
 | Access to the target model | `mode=all` or a grant on `modelId` |
 | File storage (MinIO) on arepos | Wiki create/update only |
 
@@ -40,7 +40,7 @@ Auth details: [`auth.md`](auth.md).
 2. ensure_link  ×M   (notationId + relationName|relationId)
 3. ensure_diagram
 4. add_diagram_instances  (nodes by modelNodeId, edges by modelLinkId)
-5. create_wiki?  (optional)
+5. ensure_wiki?  (optional)
 ```
 
 Rough size: ~5 call **kinds**; actual call count grows with N nodes and M links.
@@ -174,8 +174,10 @@ Prefer `add_diagram_instances` for incremental canvas edits over full replace vi
 
 ## Phase 3 — Wiki (optional)
 
+Prefer **`ensure_wiki`** over `create_wiki` for retries (idempotent).
+
 ```
-create_wiki(
+ensure_wiki(
   entityKind="diagram",   // model|diagram|node|component|notation|nodeType|linkType
   entityId,
   content,
@@ -183,10 +185,15 @@ create_wiki(
 )
 ```
 
+Behavior:
+- If `attrs.documentFileId` is set (or exactly one document ref exists) → `update_wiki` that file → `{fileId, created:false, updated:true}`
+- If none exists → same as `create_wiki` → `{fileId, created:true, updated:false}`
+- If multiple refs and no `documentFileId` → `AMBIGUOUS_WIKI`
+
 Requires `models:write` and file storage on arepos.
 Pass `modelId` for diagram/node when needed; `notationId` for component.
 
-Update an existing page:
+Manual update path (still valid):
 
 ```
 list_wiki(diagramId=...) → get_wiki(fileId=...) → update_wiki(fileId, content)
@@ -198,6 +205,7 @@ list_wiki(diagramId=...) → get_wiki(fileId=...) → update_wiki(fileId, conten
 |---------------|------|--------|
 | `AMBIGUOUS_NOTATION_ELEMENT` | Several components/relations share a name | Narrow search or pass an id |
 | `AMBIGUOUS_NODE` | Several nodes match model+parent+name | Pick id from `candidates` or use a unique name |
+| `AMBIGUOUS_WIKI` | Several document refs and no `documentFileId` | Set `documentFileId` or call `update_wiki` with an explicit `fileId` |
 | `DIAGRAM_CONFLICT` | Stale `baseUpdatedAt` | Re-read diagram and retry merge |
 | `BATCH_SAVE_CONFLICT` | Conflict in batch-save | No silent overwrite unless explicit `force=true` |
 | `409` on `update_diagram` | Not latest by name, or duplicate name+version | Prefer `ensure_diagram` + `add_diagram_instances` |
@@ -229,7 +237,7 @@ Diagram edit locks (`/api/v1/diagram-locks/*`, `LOCKED_BY_OTHER`) are **not** ca
 | 7–8 | `ensure_link` ×2 | A→B, B→C |
 | 9 | `ensure_diagram` | Landscape diagram name |
 | 10 | `add_diagram_instances` | 3 nodes + 2 edges + `baseUpdatedAt` |
-| 11 | `create_wiki` | Diagram description (optional) |
+| 11 | `ensure_wiki` | Diagram description (optional) |
 
 ## Completion checklist
 

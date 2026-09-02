@@ -44,7 +44,11 @@ object ToolResult {
                 }
             }
         } else {
-            root.put("message", ex.message ?: ex::class.java.simpleName)
+            val message = ex.message ?: ex::class.java.simpleName
+            root.put("message", message)
+            if (message.contains("AMBIGUOUS_WIKI")) {
+                root.put("code", "AMBIGUOUS_WIKI")
+            }
         }
         return transportSafe(mapper.writeValueAsString(root))
     }

@@ -122,7 +122,7 @@ docker build -t warchi-mcp:0.2.0 .
 
 **Чтение** (`models:read`): `search_catalog`, `search_model`, `search_notation`, `list_models`, `get_model`, `list_diagrams`, `get_diagram`, `list_nodes`, `get_node`, `list_links`, `get_link`, `list_notations`, `get_notation_summary`, `list_wiki`, `get_wiki`
 
-**Запись** (`models:write`): `create_node`, `ensure_node`, `update_node`, `delete_node`, `create_link`, `ensure_link`, `update_link`, `delete_link`, `create_diagram`, `ensure_diagram`, `add_diagram_instances`, `update_diagram`, `batch_save_model`, `create_wiki`, `update_wiki`, `ensure_custom_properties`
+**Запись** (`models:write`): `create_node`, `ensure_node`, `update_node`, `delete_node`, `create_link`, `ensure_link`, `update_link`, `delete_link`, `create_diagram`, `ensure_diagram`, `add_diagram_instances`, `update_diagram`, `batch_save_model`, `create_wiki`, `ensure_wiki`, `update_wiki`, `ensure_custom_properties`
 
 Каталог: [`docs/tools.ru.md`](docs/tools.ru.md).  
 Happy-path ландшафта: [`docs/landscape-recipe.ru.md`](docs/landscape-recipe.ru.md).

@@ -14,7 +14,7 @@ English: [`tools.md`](tools.md)
 { "ok": false, "status": 403, "code": "missing_scope", "message": "...", "details": { } }
 ```
 
-Известные `code`: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTATION_ELEMENT`, `AMBIGUOUS_NODE`, `model_not_allowed`, `missing_scope`, `arepos_error`.
+Известные `code`: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTATION_ELEMENT`, `AMBIGUOUS_NODE`, `AMBIGUOUS_WIKI`, `model_not_allowed`, `missing_scope`, `arepos_error`.
 
 ## Tools чтения (`models:read`)
 
@@ -63,6 +63,7 @@ English: [`tools.md`](tools.md)
 | `update_diagram` | Обновить поля/attrs диаграммы | `diagramId`, … |
 | `batch_save_model` | Атомарный batch-save (escape hatch) | `modelId`, `requestJson`, `force?` |
 | `create_wiki` | Загрузить markdown + ref | `entityKind`, `entityId`, `content`, … |
+| `ensure_wiki` | Идемпотентный ensure wiki (update если есть `documentFileId`/единственный ref, иначе create) → `{fileId, created, updated}` | как `create_wiki` |
 | `update_wiki` | Заменить markdown | `fileId`, `content`, … |
 | `ensure_custom_properties` | Создаёт отсутствующие customProperties нотационного компонента (add-if-missing по имени, существующие не трогаются) + зеркалирует на node type компонента; нужна права на редактирование нотации | `componentId`, `propertiesJson`, `nodeTypeId?` |
 
@@ -78,7 +79,7 @@ ensure_node(..., notationId, componentName)   # ×N
 ensure_link(..., notationId, relationName)    # ×N
 ensure_diagram(...)
 add_diagram_instances(..., edges по modelLinkId)
-create_wiki(...)  # опционально
+ensure_wiki(...)  # опционально (предпочтительнее create_wiki при ретраях)
 ```
 
 - `ensure_node`: ключ `modelId + parentNodeId + name` (case-insensitive); notation binding только при create.
