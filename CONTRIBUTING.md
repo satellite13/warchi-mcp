@@ -47,6 +47,7 @@ Before creating a PR, run:
 GitHub Actions runs the same `./gradlew build` (plus Helm chart lint) on every push and pull request to `master`.
 
 If you change MCP tool contracts, update `docs/tools.md` and `docs/tools.ru.md`.
+If you change the landscape happy-path flow, also update `docs/landscape-recipe.md` and `docs/landscape-recipe.ru.md`.
 
 If you change auth behavior, update `docs/auth.md` and `docs/auth.ru.md`.
 

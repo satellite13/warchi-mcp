@@ -45,6 +45,7 @@ export AREPOS_BASE_URL=http://localhost:8080
 GitHub Actions на каждый push и pull request в `master` запускает тот же `./gradlew build` (плюс lint Helm-чарта).
 
 При изменении контрактов MCP tools обновляйте `docs/tools.md` и `docs/tools.ru.md`.
+При изменении happy-path ландшафта — также `docs/landscape-recipe.md` и `docs/landscape-recipe.ru.md`.
 
 При изменении auth — `docs/auth.md` и `docs/auth.ru.md`.
 

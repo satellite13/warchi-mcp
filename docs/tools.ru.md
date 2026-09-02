@@ -66,7 +66,9 @@ English: [`tools.md`](tools.md)
 | `update_wiki` | Заменить markdown | `fileId`, `content`, … |
 | `ensure_custom_properties` | Создаёт отсутствующие customProperties нотационного компонента (add-if-missing по имени, существующие не трогаются) + зеркалирует на node type компонента; нужна права на редактирование нотации | `componentId`, `propertiesJson`, `nodeTypeId?` |
 
-### Happy-path ландшафт (~5 вызовов)
+### Happy-path ландшафт (~5 типов вызовов)
+
+Полный пошаговый рецепт: [`landscape-recipe.ru.md`](landscape-recipe.ru.md).
 
 Предпочитайте `ensure_node` / `ensure_diagram` / `ensure_link` вместо `create_*` при ретраях (идемпотентно).
 
