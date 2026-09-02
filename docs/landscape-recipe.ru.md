@@ -22,7 +22,7 @@ English: [`landscape-recipe.md`](landscape-recipe.md)
 |-----------|--------|
 | API-ключ `warchi_ak_…` | Клиент → MCP (`Authorization` / `X-Api-Key`) |
 | Scope `models:read` | Discovery (`search_*`, `get_*`, `list_wiki`) |
-| Scope `models:write` | `ensure_*`, `add_diagram_instances`, `create_wiki`, … |
+| Scope `models:write` | `ensure_*`, `add_diagram_instances`, `ensure_wiki`, … |
 | Доступ к целевой модели | `mode=all` или grant на `modelId` |
 | File storage (MinIO) в arepos | Только для wiki create/update |
 
@@ -40,7 +40,7 @@ English: [`landscape-recipe.md`](landscape-recipe.md)
 2. ensure_link  ×M   (notationId + relationName|relationId)
 3. ensure_diagram
 4. add_diagram_instances  (nodes по modelNodeId, edges по modelLinkId)
-5. create_wiki?  (опционально)
+5. ensure_wiki?  (опционально)
 ```
 
 Ориентир объёма: ~5 **типов** вызовов; фактическое число растёт с N узлов и M связей.
@@ -174,8 +174,10 @@ add_diagram_instances(
 
 ## Фаза 3 — Wiki (опционально)
 
+Предпочитайте **`ensure_wiki`** вместо `create_wiki` при ретраях (идемпотентно).
+
 ```
-create_wiki(
+ensure_wiki(
   entityKind="diagram",   // model|diagram|node|component|notation|nodeType|linkType
   entityId,
   content,
@@ -183,10 +185,15 @@ create_wiki(
 )
 ```
 
+Поведение:
+- Если задан `attrs.documentFileId` (или ровно один document ref) → `update_wiki` этого файла → `{fileId, created:false, updated:true}`
+- Если ничего нет → как `create_wiki` → `{fileId, created:true, updated:false}`
+- Если несколько refs без `documentFileId` → `AMBIGUOUS_WIKI`
+
 Требует `models:write` и file storage в arepos.
 Для diagram/node при необходимости передайте `modelId`; для component — `notationId`.
 
-Обновление существующей страницы:
+Ручное обновление (по-прежнему валидно):
 
 ```
 list_wiki(diagramId=...) → get_wiki(fileId=...) → update_wiki(fileId, content)
@@ -198,6 +205,7 @@ list_wiki(diagramId=...) → get_wiki(fileId=...) → update_wiki(fileId, conten
 |--------------|-------|----------|
 | `AMBIGUOUS_NOTATION_ELEMENT` | Несколько component/relation с одним именем | Уточнить поиск или передать id |
 | `AMBIGUOUS_NODE` | Несколько узлов по model+parent+name | Выбрать id из `candidates` или уникальное имя |
+| `AMBIGUOUS_WIKI` | Несколько document refs без `documentFileId` | Выставить `documentFileId` или вызвать `update_wiki` с явным `fileId` |
 | `DIAGRAM_CONFLICT` | Устарел `baseUpdatedAt` | Перечитать диаграмму и повторить merge |
 | `BATCH_SAVE_CONFLICT` | Конфликт в batch-save | Без silent overwrite, кроме явного `force=true` |
 | `409` на `update_diagram` | Не latest по имени или дубль name+version | `ensure_diagram` + `add_diagram_instances` |
@@ -229,7 +237,7 @@ list_wiki(diagramId=...) → get_wiki(fileId=...) → update_wiki(fileId, conten
 | 7–8 | `ensure_link` ×2 | A→B, B→C |
 | 9 | `ensure_diagram` | Имя ландшафтной диаграммы |
 | 10 | `add_diagram_instances` | 3 nodes + 2 edges + `baseUpdatedAt` |
-| 11 | `create_wiki` | Описание диаграммы (опционально) |
+| 11 | `ensure_wiki` | Описание диаграммы (опционально) |
 
 ## Чеклист завершения
 

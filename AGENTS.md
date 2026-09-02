@@ -40,7 +40,7 @@ src/main/kotlin/ru/kavader/warchimcp/
     ├── ModelReadTools.kt
     ├── ModelWriteTools.kt
     ├── SearchTools.kt          # search_catalog / search_model / search_notation
-    ├── WikiTools.kt            # list/get/create/update wiki
+    ├── WikiTools.kt            # list/get/create/ensure/update wiki
     ├── NotationTools.kt        # ensure_custom_properties (notation component + node type attrs merge)
     ├── CustomProperties.kt     # pure add-if-missing merge logic for attrs.customProperties
     └── ToolResult.kt           # ok/error JSON envelope for tools
