@@ -66,7 +66,9 @@ Known `code` values: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTAT
 | `update_wiki` | Replace markdown content | `fileId`, `content`, `filename?` |
 | `ensure_custom_properties` | Ensure customProperties exist on a notation component (create-if-missing by name, existing untouched) and mirror them onto the component's node type; requires notation edit permission | `componentId`, `propertiesJson`, `nodeTypeId?` |
 
-### Happy-path landscape recipe (~5 calls)
+### Happy-path landscape recipe (~5 call kinds)
+
+Full step-by-step recipe: [`landscape-recipe.md`](landscape-recipe.md).
 
 Prefer `ensure_node` / `ensure_diagram` / `ensure_link` over `create_*` for retries (idempotent).
 

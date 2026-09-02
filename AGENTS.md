@@ -63,7 +63,7 @@ Env: `AREPOS_BASE_URL` (required in real use), `PORT` (default `8090`).
 - Never log API keys or JWTs
 - Prefer curated tools over exposing raw REST 1:1
 - Write tools must surface arepos conflict/lock codes without silent overwrite
-- Keep `docs/auth*.md` and `docs/tools*.md` in sync with behavior changes
+- Keep `docs/auth*.md`, `docs/tools*.md`, and `docs/landscape-recipe*.md` in sync with behavior changes
 - Dual license: AGPL-3.0-or-later + commercial (same family as arepos/wArchi)
 
 ## Related Repos
@@ -80,4 +80,4 @@ Feature work that spans components uses a shared branch name, e.g. `feat/warchi-
 - Own persistence for keys or sessions
 - `layout_diagram`, graph neighbors, relation-rules enforce on create, `delete_diagram`
 
-Convenience write path for landscapes: `search_notation` → notation-aware `ensure_node` / `ensure_link` → `ensure_diagram` → `add_diagram_instances` (arepos-backed). Prefer `ensure_*` over `create_*` for retries. `batch_save_model` remains the escape hatch.
+Convenience write path for landscapes: `search_catalog` / `search_notation` → notation-aware `ensure_node` / `ensure_link` → `ensure_diagram` → `add_diagram_instances` (arepos-backed). Prefer `ensure_*` over `create_*` for retries. `batch_save_model` remains the escape hatch. Step-by-step: [`docs/landscape-recipe.md`](docs/landscape-recipe.md) / [`docs/landscape-recipe.ru.md`](docs/landscape-recipe.ru.md).
