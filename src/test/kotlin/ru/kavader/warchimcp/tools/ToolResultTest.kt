@@ -63,14 +63,15 @@ class ToolResultTest {
     }
 
     @Test
-    fun `error classifies diagram conflict`() {
-        val json = ToolResult.error(
-            AreposClientException(
-                status = 409,
-                message = "Conflict",
-                body = """{"error":"DIAGRAM_CONFLICT","diagramId":"x"}"""
-            )
-        )
-        assertTrue(json.contains("DIAGRAM_CONFLICT"))
+    fun `run returns ok on success and error on failure`() {
+        val ok = ToolResult.run { mapOf("id" to "n1") }
+        assertTrue(ok.contains("\"ok\":true"))
+        assertTrue(ok.contains("n1"))
+
+        val err = ToolResult.run {
+            throw AreposClientException(403, "missing_scope", """{"error":"missing_scope"}""")
+        }
+        assertTrue(err.contains("\"ok\":false"))
+        assertTrue(err.contains("missing_scope"))
     }
 }

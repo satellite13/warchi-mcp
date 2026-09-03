@@ -44,10 +44,22 @@ object ToolResult {
                 }
             }
         } else {
-            root.put("message", ex.message ?: ex::class.java.simpleName)
+            val message = ex.message ?: ex::class.java.simpleName
+            root.put("message", message)
+            if (message.contains("AMBIGUOUS_WIKI")) {
+                root.put("code", "AMBIGUOUS_WIKI")
+            }
         }
         return transportSafe(mapper.writeValueAsString(root))
     }
+
+    /** Shared try/catch envelope used by all MCP tool classes. */
+    fun run(block: () -> Any?): String =
+        try {
+            ok(block())
+        } catch (ex: Exception) {
+            error(ex)
+        }
 
     private fun classify(ex: AreposClientException, root: ObjectNode) {
         val body = ex.body.orEmpty()

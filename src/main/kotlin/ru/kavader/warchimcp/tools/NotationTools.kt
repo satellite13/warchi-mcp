@@ -16,10 +16,9 @@ import ru.kavader.warchimcp.client.AreposApiClient
  */
 @Component
 class NotationTools(
-    private val api: AreposApiClient
+    private val api: AreposApiClient,
+    private val mapper: ObjectMapper
 ) {
-    private val mapper = ObjectMapper().findAndRegisterModules()
-
     @McpTool(
         name = "ensure_custom_properties",
         description = "Ensure customProperties are defined on a notation component " +
@@ -42,7 +41,7 @@ class NotationTools(
                 "[{\"name\":\"owner\",\"type\":\"string\",\"required\":false,\"maxLength\":40}]",
             required = true
         ) propertiesJson: String
-    ): String = runTool {
+    ): String = ToolResult.run {
         val definitions = CustomProperties.parseDefinitions(propertiesJson, mapper)
 
         val component = api.getJson("/api/v1/components/$componentId")
@@ -93,7 +92,7 @@ class NotationTools(
     )
     fun getNodeTypeDefaultDirectory(
         @McpToolParam(description = "Node type UUID", required = true) nodeTypeId: String
-    ): String = runTool {
+    ): String = ToolResult.run {
         val nodeType = api.getJson("/api/v1/node-types/$nodeTypeId")
         val attrs = nodeType.path("attrs").asText(null)
         val defaultDir = attrs?.let { a ->
@@ -123,7 +122,7 @@ class NotationTools(
             description = "Directory path (e.g. '/Application', '/Technology'). Pass empty string or omit to clear.",
             required = false
         ) defaultDirectoryPath: String? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         val nodeType = api.getJson("/api/v1/node-types/$nodeTypeId")
         val attrsRaw = nodeType.path("attrs").asText(null)
         val root: com.fasterxml.jackson.databind.node.ObjectNode = when {
@@ -157,11 +156,4 @@ class NotationTools(
             "changed" to changed
         )
     }
-
-    private fun runTool(block: () -> Any?): String =
-        try {
-            ToolResult.ok(block())
-        } catch (ex: Exception) {
-            ToolResult.error(ex)
-        }
 }

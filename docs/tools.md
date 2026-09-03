@@ -14,7 +14,7 @@ or:
 { "ok": false, "status": 403, "code": "missing_scope", "message": "...", "details": { } }
 ```
 
-Known `code` values: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTATION_ELEMENT`, `AMBIGUOUS_NODE`, `model_not_allowed`, `missing_scope`, `arepos_error`.
+Known `code` values: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTATION_ELEMENT`, `AMBIGUOUS_NODE`, `AMBIGUOUS_WIKI`, `model_not_allowed`, `missing_scope`, `arepos_error`.
 
 ## Read tools (`models:read`)
 
@@ -63,10 +63,13 @@ Known `code` values: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTAT
 | `update_diagram` | Update diagram fields/attrs | `diagramId`, `name?`, `version?`, `notationId?`, `nodeId?`, `attrs?` |
 | `batch_save_model` | Atomic batch save (escape hatch) | `modelId`, `requestJson` (BatchSaveRequest), `force?` |
 | `create_wiki` | Upload markdown, register ref, set `attrs.documentFileId` | `entityKind`, `entityId`, `content`, `filename?`, `modelId?`, `notationId?` |
+| `ensure_wiki` | Idempotent ensure wiki markdown (update if `documentFileId`/single ref exists, else create) → `{fileId, created, updated}` | same as `create_wiki` |
 | `update_wiki` | Replace markdown content | `fileId`, `content`, `filename?` |
 | `ensure_custom_properties` | Ensure customProperties exist on a notation component (create-if-missing by name, existing untouched) and mirror them onto the component's node type; requires notation edit permission | `componentId`, `propertiesJson`, `nodeTypeId?` |
 
-### Happy-path landscape recipe (~5 calls)
+### Happy-path landscape recipe (~5 call kinds)
+
+Full step-by-step recipe: [`landscape-recipe.md`](landscape-recipe.md).
 
 Prefer `ensure_node` / `ensure_diagram` / `ensure_link` over `create_*` for retries (idempotent).
 
@@ -76,7 +79,7 @@ ensure_node(modelId, name, notationId, componentName)   # ×N
 ensure_link(modelId, sourceId, targetId, notationId, relationName)  # ×N
 ensure_diagram(modelId, name, notationId)
 add_diagram_instances(diagramId, nodesJson, edgesJson)  # edges by modelLinkId only
-create_wiki(...)  # optional
+ensure_wiki(...)  # optional (prefer over create_wiki for retries)
 ```
 
 - With `notationId` + `componentName` / `relationName`, arepos resolves type ids and writes `notationComponents` / `notationRelations`.

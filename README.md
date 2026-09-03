@@ -37,7 +37,7 @@ src/main/kotlin/ru/kavader/warchimcp/
 src/main/resources/
   application.yaml
 
-docs/         # auth & tools documentation
+docs/         # auth, tools, landscape recipe documentation
 ```
 
 ## Requirements
@@ -80,7 +80,7 @@ export AREPOS_BASE_URL=http://localhost:8080
 ./gradlew test        # unit tests
 ./gradlew bootJar     # fat JAR
 ./gradlew bootRun     # local run
-docker build -t warchi-mcp:0.1.0 .
+docker build -t warchi-mcp:0.2.0 .
 ```
 
 ## MCP Endpoint
@@ -120,11 +120,12 @@ Details: [`docs/auth.md`](docs/auth.md).
 
 ## Tools (v1)
 
-**Read** (`models:read`): `search_catalog`, `search_model`, `list_models`, `get_model`, `list_diagrams`, `get_diagram`, `list_nodes`, `get_node`, `list_links`, `get_link`, `list_notations`, `get_notation_summary`, `list_wiki`, `get_wiki`
+**Read** (`models:read`): `search_catalog`, `search_model`, `search_notation`, `list_models`, `get_model`, `list_diagrams`, `get_diagram`, `list_nodes`, `get_node`, `list_links`, `get_link`, `list_notations`, `get_notation_summary`, `list_wiki`, `get_wiki`
 
-**Write** (`models:write`): `create_node`, `update_node`, `delete_node`, `create_link`, `update_link`, `delete_link`, `update_diagram`, `batch_save_model`, `create_wiki`, `update_wiki`
+**Write** (`models:write`): `create_node`, `ensure_node`, `update_node`, `delete_node`, `create_link`, `ensure_link`, `update_link`, `delete_link`, `create_diagram`, `ensure_diagram`, `add_diagram_instances`, `update_diagram`, `batch_save_model`, `create_wiki`, `ensure_wiki`, `update_wiki`, `ensure_custom_properties`
 
-Tool catalogue: [`docs/tools.md`](docs/tools.md).
+Tool catalogue: [`docs/tools.md`](docs/tools.md).  
+Landscape happy-path: [`docs/landscape-recipe.md`](docs/landscape-recipe.md).
 
 ## Kubernetes (local / cluster)
 
@@ -160,10 +161,10 @@ Typical production layout:
 ### Docker
 
 ```bash
-docker build -t warchi-mcp:0.1.0 .
+docker build -t warchi-mcp:0.2.0 .
 docker run --rm -p 8090:8090 \
   -e AREPOS_BASE_URL=https://api.example.com \
-  warchi-mcp:0.1.0
+  warchi-mcp:0.2.0
 ```
 
 ### Smoke checklist

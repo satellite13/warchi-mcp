@@ -8,10 +8,9 @@ import ru.kavader.warchimcp.client.AreposApiClient
 
 @Component
 class ModelWriteTools(
-    private val api: AreposApiClient
+    private val api: AreposApiClient,
+    private val mapper: ObjectMapper
 ) {
-    private val mapper = ObjectMapper().findAndRegisterModules()
-
     @McpTool(
         name = "create_node",
         description = "Create a node in a model. Prefer notationId+componentName (or componentId) " +
@@ -29,7 +28,7 @@ class ModelWriteTools(
         @McpToolParam(description = "Notation component UUID", required = false) componentId: String? = null,
         @McpToolParam(description = "Notation component name (requires notationId)", required = false)
         componentName: String? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.postJson(
             "/api/v1/nodes",
             mapOf(
@@ -63,7 +62,7 @@ class ModelWriteTools(
         @McpToolParam(description = "Notation component UUID", required = false) componentId: String? = null,
         @McpToolParam(description = "Notation component name (requires notationId)", required = false)
         componentName: String? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.postJson(
             "/api/v1/nodes/ensure",
             mapOf(
@@ -86,7 +85,7 @@ class ModelWriteTools(
         @McpToolParam(description = "Node type UUID", required = false) nodeTypeId: String? = null,
         @McpToolParam(description = "Parent node UUID", required = false) parentNodeId: String? = null,
         @McpToolParam(description = "JSON attrs string", required = false) attrs: String? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.putJson(
             "/api/v1/nodes/$nodeId",
             mapOf(
@@ -101,7 +100,7 @@ class ModelWriteTools(
     @McpTool(name = "delete_node", description = "Delete a node by id")
     fun deleteNode(
         @McpToolParam(description = "Node UUID", required = true) nodeId: String
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.deleteJson("/api/v1/nodes/$nodeId")
         mapOf("deleted" to true, "nodeId" to nodeId)
     }
@@ -123,7 +122,7 @@ class ModelWriteTools(
         @McpToolParam(description = "Notation relation UUID", required = false) relationId: String? = null,
         @McpToolParam(description = "Notation relation name (requires notationId)", required = false)
         relationName: String? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.postJson(
             "/api/v1/links",
             mapOf(
@@ -156,7 +155,7 @@ class ModelWriteTools(
         @McpToolParam(description = "Notation relation UUID", required = false) relationId: String? = null,
         @McpToolParam(description = "Notation relation name (requires notationId)", required = false)
         relationName: String? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.postJson(
             "/api/v1/links/ensure",
             mapOf(
@@ -179,7 +178,7 @@ class ModelWriteTools(
         @McpToolParam(description = "Target node UUID", required = false) targetId: String? = null,
         @McpToolParam(description = "Link type UUID", required = false) linkTypeId: String? = null,
         @McpToolParam(description = "JSON attrs string", required = false) attrs: String? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.putJson(
             "/api/v1/links/$linkId",
             mapOf(
@@ -194,7 +193,7 @@ class ModelWriteTools(
     @McpTool(name = "delete_link", description = "Delete a link by id")
     fun deleteLink(
         @McpToolParam(description = "Link UUID", required = true) linkId: String
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.deleteJson("/api/v1/links/$linkId")
         mapOf("deleted" to true, "linkId" to linkId)
     }
@@ -211,7 +210,7 @@ class ModelWriteTools(
         @McpToolParam(description = "Bound model node UUID", required = false) nodeId: String? = null,
         @McpToolParam(description = "Diagram version (default 1.0.0)", required = false) version: String? = null,
         @McpToolParam(description = "JSON attrs string (default empty instances)", required = false) attrs: String? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.postJson(
             "/api/v1/diagrams",
             mapOf(
@@ -240,7 +239,7 @@ class ModelWriteTools(
         @McpToolParam(description = "Diagram version (default 1.0.0 on create)", required = false) version: String? = null,
         @McpToolParam(description = "JSON attrs string (default empty instances on create)", required = false)
         attrs: String? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.postJson(
             "/api/v1/diagrams/ensure",
             mapOf(
@@ -272,7 +271,7 @@ class ModelWriteTools(
         ) edgesJson: String? = null,
         @McpToolParam(description = "Optimistic concurrency base updatedAt (ISO-8601)", required = false)
         baseUpdatedAt: String? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         val body = mapper.createObjectNode()
         body.set<com.fasterxml.jackson.databind.JsonNode>(
             "nodes",
@@ -303,7 +302,7 @@ class ModelWriteTools(
         @McpToolParam(description = "Notation UUID", required = false) notationId: String? = null,
         @McpToolParam(description = "Bound model node UUID", required = false) nodeId: String? = null,
         @McpToolParam(description = "JSON attrs string (diagram content)", required = false) attrs: String? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.putJson(
             "/api/v1/diagrams/$diagramId",
             mapOf(
@@ -329,18 +328,11 @@ class ModelWriteTools(
             required = true
         ) requestJson: String,
         @McpToolParam(description = "Force overwrite on conflict", required = false) force: Boolean? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         val tree = mapper.readTree(requestJson)
         if (force != null && tree is com.fasterxml.jackson.databind.node.ObjectNode) {
             tree.put("force", force)
         }
         api.postJson("/api/v1/models/$modelId/batch-save", mapper.treeToValue(tree, Map::class.java))
     }
-
-    private fun runTool(block: () -> Any?): String =
-        try {
-            ToolResult.ok(block())
-        } catch (ex: Exception) {
-            ToolResult.error(ex)
-        }
 }

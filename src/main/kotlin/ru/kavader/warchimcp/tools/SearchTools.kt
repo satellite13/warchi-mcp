@@ -21,7 +21,7 @@ class SearchTools(
         kinds: String? = null,
         @McpToolParam(description = "Max hits (default 20, max 50)", required = false)
         limit: Int? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.getJson(
             "/api/v1/search/catalog",
             mapOf(
@@ -43,7 +43,7 @@ class SearchTools(
         kinds: String? = null,
         @McpToolParam(description = "Max hits (default 20, max 50)", required = false)
         limit: Int? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.getJson(
             "/api/v1/search/models/$modelId",
             mapOf(
@@ -66,7 +66,7 @@ class SearchTools(
         kinds: String? = null,
         @McpToolParam(description = "Max hits (default 20, max 50)", required = false)
         limit: Int? = null
-    ): String = runTool {
+    ): String = ToolResult.run {
         api.getJson(
             "/api/v1/search/notations/$notationId",
             mapOf(
@@ -76,11 +76,4 @@ class SearchTools(
             )
         )
     }
-
-    private fun runTool(block: () -> Any?): String =
-        try {
-            ToolResult.ok(block())
-        } catch (ex: Exception) {
-            ToolResult.error(ex)
-        }
 }

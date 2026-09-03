@@ -117,7 +117,9 @@ class AreposApiClient(
                 builder.queryParam(key, value)
             }
         }
-        return builder.build(true).toUriString()
+        // Encode query values (e.g. spaces in search q). build(true) assumes
+        // already-encoded input and rejects characters like ' '.
+        return builder.build().encode().toUriString()
     }
 
 }
