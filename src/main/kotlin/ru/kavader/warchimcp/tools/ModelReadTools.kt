@@ -102,6 +102,20 @@ class ModelReadTools(
         api.getJson("/api/v1/links/$linkId")
     }
 
+    @McpTool(name = "get_node_type", description = "Get node type by id including attrs (e.g. defaultDirectoryPath)")
+    fun getNodeType(
+        @McpToolParam(description = "Node type UUID", required = true) nodeTypeId: String
+    ): String = ToolResult.run {
+        api.getJson("/api/v1/node-types/$nodeTypeId")
+    }
+
+    @McpTool(name = "get_component", description = "Get notation component by id including attrs")
+    fun getComponent(
+        @McpToolParam(description = "Component UUID", required = true) componentId: String
+    ): String = ToolResult.run {
+        api.getJson("/api/v1/components/$componentId")
+    }
+
     @McpTool(name = "list_notations", description = "List notations accessible to the user")
     fun listNotations(
         @McpToolParam(description = "Optional name filter", required = false) name: String? = null,

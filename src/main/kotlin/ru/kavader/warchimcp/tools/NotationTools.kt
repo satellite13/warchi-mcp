@@ -83,4 +83,77 @@ class NotationTools(
             "added" to merge.added,
             "existing" to merge.existing
         )
+
+    @McpTool(
+        name = "get_node_type_default_directory",
+        description = "Get the defaultDirectoryPath from a node type's attrs. " +
+            "Returns {nodeTypeId, name, defaultDirectoryPath}. " +
+            "defaultDirectoryPath is null if not set."
+    )
+    fun getNodeTypeDefaultDirectory(
+        @McpToolParam(description = "Node type UUID", required = true) nodeTypeId: String
+    ): String = ToolResult.run {
+        val nodeType = api.getJson("/api/v1/node-types/$nodeTypeId")
+        val attrs = nodeType.path("attrs").asText(null)
+        val defaultDir = attrs?.let { a ->
+            try {
+                mapper.readTree(a).path("defaultDirectoryPath").asText(null)
+            } catch (_: Exception) {
+                null
+            }
+        }
+        mapOf(
+            "nodeTypeId" to nodeType.path("id").asText(nodeTypeId),
+            "name" to nodeType.path("name").asText(""),
+            "defaultDirectoryPath" to defaultDir
+        )
+    }
+
+    @McpTool(
+        name = "set_node_type_default_directory",
+        description = "Set or clear the defaultDirectoryPath on a node type's attrs. " +
+            "Idempotent — safe to retry. Requires notation/node-type edit permission. " +
+            "Pass an empty string or null to clear. " +
+            "Returns {nodeTypeId, name, defaultDirectoryPath, changed}."
+    )
+    fun setNodeTypeDefaultDirectory(
+        @McpToolParam(description = "Node type UUID", required = true) nodeTypeId: String,
+        @McpToolParam(
+            description = "Directory path (e.g. '/Application', '/Technology'). Pass empty string or omit to clear.",
+            required = false
+        ) defaultDirectoryPath: String? = null
+    ): String = ToolResult.run {
+        val nodeType = api.getJson("/api/v1/node-types/$nodeTypeId")
+        val attrsRaw = nodeType.path("attrs").asText(null)
+        val root: com.fasterxml.jackson.databind.node.ObjectNode = when {
+            attrsRaw.isNullOrBlank() -> mapper.createObjectNode()
+            else -> {
+                val parsed = mapper.readTree(attrsRaw)
+                require(parsed is com.fasterxml.jackson.databind.node.ObjectNode) {
+                    "current attrs is not a JSON object"
+                }
+                parsed
+            }
+        }
+
+        val currentDir = root.path("defaultDirectoryPath").asText(null)
+        val targetDir = defaultDirectoryPath?.takeIf { it.isNotBlank() }
+
+        val changed = currentDir != targetDir
+        if (changed) {
+            if (targetDir != null) {
+                root.put("defaultDirectoryPath", targetDir)
+            } else {
+                (root as com.fasterxml.jackson.databind.node.ObjectNode).remove("defaultDirectoryPath")
+            }
+            api.putJson("/api/v1/node-types/$nodeTypeId", mapOf("attrs" to mapper.writeValueAsString(root)))
+        }
+
+        mapOf(
+            "nodeTypeId" to nodeType.path("id").asText(nodeTypeId),
+            "name" to nodeType.path("name").asText(""),
+            "defaultDirectoryPath" to (if (changed) targetDir else currentDir),
+            "changed" to changed
+        )
+    }
 }
