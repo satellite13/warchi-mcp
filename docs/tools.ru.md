@@ -65,7 +65,7 @@ English: [`tools.md`](tools.md)
 | `create_wiki` | Загрузить markdown + ref | `entityKind`, `entityId`, `content`, … |
 | `ensure_wiki` | Идемпотентный ensure wiki (update если есть `documentFileId`/единственный ref, иначе create) → `{fileId, created, updated}` | как `create_wiki` |
 | `update_wiki` | Заменить markdown | `fileId`, `content`, … |
-| `ensure_custom_properties` | Создаёт отсутствующие customProperties нотационного компонента (add-if-missing по имени, существующие не трогаются) + зеркалирует на node type компонента; нужна права на редактирование нотации | `componentId`, `propertiesJson`, `nodeTypeId?` |
+| `ensure_custom_properties` | Создаёт отсутствующие customProperties нотационного компонента (add-if-missing по имени, существующие не трогаются) + зеркалирует на node type компонента; `componentId` можно опустить, если задан `nodeTypeId` — тогда схема пишется только в этот node type (например, папочные типы вроде Directory вне нотации); нужна права на редактирование нотации | `componentId?`, `propertiesJson`, `nodeTypeId?` (хотя бы один обязателен) |
 
 ### Happy-path ландшафт (~5 типов вызовов)
 

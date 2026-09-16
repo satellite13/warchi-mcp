@@ -65,7 +65,7 @@ Known `code` values: `BATCH_SAVE_CONFLICT`, `DIAGRAM_CONFLICT`, `AMBIGUOUS_NOTAT
 | `create_wiki` | Upload markdown, register ref, set `attrs.documentFileId` | `entityKind`, `entityId`, `content`, `filename?`, `modelId?`, `notationId?` |
 | `ensure_wiki` | Idempotent ensure wiki markdown (update if `documentFileId`/single ref exists, else create) → `{fileId, created, updated}` | same as `create_wiki` |
 | `update_wiki` | Replace markdown content | `fileId`, `content`, `filename?` |
-| `ensure_custom_properties` | Ensure customProperties exist on a notation component (create-if-missing by name, existing untouched) and mirror them onto the component's node type; requires notation edit permission | `componentId`, `propertiesJson`, `nodeTypeId?` |
+| `ensure_custom_properties` | Ensure customProperties exist on a notation component (create-if-missing by name, existing untouched) and mirror them onto the component's node type; `componentId` may be omitted when `nodeTypeId` is given — then the schema is written to that node type only (e.g. folder node types like Directory that live outside any notation); requires notation edit permission | `componentId?`, `propertiesJson`, `nodeTypeId?` (one of the two is required) |
 
 ### Happy-path landscape recipe (~5 call kinds)
 

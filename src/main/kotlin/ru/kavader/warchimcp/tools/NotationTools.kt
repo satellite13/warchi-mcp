@@ -24,16 +24,23 @@ class NotationTools(
         description = "Ensure customProperties are defined on a notation component " +
             "(create-if-missing, matched by name; existing definitions are left untouched) and mirror " +
             "the same properties onto the component's node type (override with nodeTypeId). " +
+            "componentId may be omitted when nodeTypeId is given — then the properties are ensured on " +
+            "that node type only (no notation component), which is how folder node types like " +
+            "Directory (outside any notation) get their property schema. " +
             "Idempotent — safe to retry. Requires notation edit permission of the API key owner. " +
-            "Returns {component: {id, name, changed, added, existing}, nodeType: {...}}. " +
+            "Returns {component: {...} | null, nodeType: {id, name, changed, added, existing}}. " +
             "propertiesJson is a JSON array: [{\"name\":\"owner\",\"type\":\"string\",\"maxLength\":40}, " +
             "{\"name\":\"severity\",\"type\":\"enum\",\"enumValues\":[\"Low\",\"Critical\"]}, ...]. " +
             "type is string|number|boolean|enum; unknown fields (defaultValue, interactive, ...) are copied."
     )
     fun ensureCustomProperties(
-        @McpToolParam(description = "Notation component UUID", required = true) componentId: String,
         @McpToolParam(
-            description = "Node type UUID to mirror the properties into (default: the component's own node type)",
+            description = "Notation component UUID (optional when nodeTypeId is provided)",
+            required = false
+        ) componentId: String? = null,
+        @McpToolParam(
+            description = "Node type UUID to write the properties into (default: the component's own node type). " +
+                "Required when componentId is omitted",
             required = false
         ) nodeTypeId: String? = null,
         @McpToolParam(
@@ -44,19 +51,30 @@ class NotationTools(
     ): String = ToolResult.run {
         val definitions = CustomProperties.parseDefinitions(propertiesJson, mapper)
 
-        val component = api.getJson("/api/v1/components/$componentId")
-        val componentMerge = CustomProperties.merge(
-            component.path("attrs").asText(null), definitions, mapper
-        )
-        if (componentMerge.changed) {
-            api.putJson("/api/v1/components/$componentId", mapOf("attrs" to componentMerge.attrs))
+        val explicitNodeType = nodeTypeId?.takeIf { it.isNotBlank() }
+        require(!componentId.isNullOrBlank() || explicitNodeType != null) {
+            "either componentId or nodeTypeId must be provided"
         }
 
-        val ntyId = nodeTypeId?.takeIf { it.isNotBlank() }
-            ?: component.path("nodeTypeId").asText(null)
+        // Fetch the component once; it feeds both the component merge and the default node type.
+        val componentPayload = componentId?.takeIf { it.isNotBlank() }
+            ?.let { api.getJson("/api/v1/components/$it") }
+        val ntyId = explicitNodeType
+            ?: componentPayload?.path("nodeTypeId")?.asText(null)
             ?: throw IllegalStateException(
                 "component $componentId has no node type and nodeTypeId was not provided"
             )
+
+        val componentEntry: Map<String, Any?>? = componentPayload?.let { component ->
+            val cid = component.path("id").asText(componentId)
+            val componentMerge = CustomProperties.merge(
+                component.path("attrs").asText(null), definitions, mapper
+            )
+            if (componentMerge.changed) {
+                api.putJson("/api/v1/components/$cid", mapOf("attrs" to componentMerge.attrs))
+            }
+            resultEntry(component.path("id").asText(cid), component.path("name").asText(cid), componentMerge)
+        }
         val nodeType = api.getJson("/api/v1/node-types/$ntyId")
         val nodeTypeMerge = CustomProperties.merge(
             nodeType.path("attrs").asText(null), definitions, mapper
@@ -66,9 +84,7 @@ class NotationTools(
         }
 
         mapOf(
-            "component" to resultEntry(
-                component.path("id").asText(componentId), component.path("name").asText(componentId), componentMerge
-            ),
+            "component" to componentEntry,
             "nodeType" to resultEntry(
                 nodeType.path("id").asText(ntyId), nodeType.path("name").asText(ntyId), nodeTypeMerge
             )
