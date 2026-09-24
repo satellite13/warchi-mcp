@@ -64,7 +64,7 @@ Env: `AREPOS_BASE_URL` (required in real use), `PORT` (default `8090`).
 - Prefer curated tools over exposing raw REST 1:1
 - Write tools must surface arepos conflict/lock codes without silent overwrite
 - Keep `docs/auth*.md`, `docs/tools*.md`, and `docs/landscape-recipe*.md` in sync with behavior changes
-- Dual license: AGPL-3.0-or-later + commercial (same family as arepos/wArchi)
+- MIT License (same as arepos/wArchi; previously AGPL-3.0-or-later + commercial)
 
 ## Related Repos
 
